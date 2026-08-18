@@ -13,7 +13,19 @@ const THEME_OPTIONS = [
 ]
 
 // A little Easter egg for the settings footer — picked once per visit.
-const FUN_ANIMATIONS = [ANIM.cat, ANIM.catFace, ANIM.cow, ANIM.duck, ANIM.cat2]
+const FUN_ANIMATIONS = [
+  ANIM.cat,
+  ANIM.catFace,
+  ANIM.cow,
+  ANIM.duck,
+  ANIM.cat2,
+  ANIM.bunny,
+  ANIM.koala,
+  ANIM.mascot,
+  ANIM.greenMascot,
+  ANIM.walkingTaco,
+  ANIM.wumpus,
+]
 
 export default function Settings() {
   const { preference, setPreference } = useTheme()
@@ -27,7 +39,10 @@ export default function Settings() {
       </div>
 
       <Card className="p-5">
-        <h3 className="text-sm font-semibold">Appearance</h3>
+        <div className="flex items-center gap-2">
+          <h3 className="text-sm font-semibold">Appearance</h3>
+          <AppLottie src={ANIM.sparkle} size={18} />
+        </div>
         <p className="mt-0.5 text-sm text-muted-foreground">Choose a theme, or follow your system setting.</p>
         <div className="mt-4 grid grid-cols-3 gap-3">
           {THEME_OPTIONS.map((opt) => (
