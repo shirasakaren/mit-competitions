@@ -52,7 +52,7 @@ export default function Overview() {
           <h2 className="text-2xl font-semibold tracking-tight">Customer Intelligence Platform</h2>
           <p className="mt-1 max-w-xl text-sm text-muted-foreground">
             Live search, data quality analytics, and duplicate detection over{' '}
-            {health.data ? formatNumber(health.data.total_records) : '15,000,000'} customer records — all computed
+            {health.data ? formatNumber(health.data.total_records) : '14,999,896'} customer records — all computed
             directly against PostgreSQL, nothing pre-computed.
           </p>
         </div>
