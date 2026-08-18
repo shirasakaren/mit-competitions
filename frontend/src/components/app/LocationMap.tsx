@@ -47,10 +47,10 @@ function fitGeography(geo: GeoCollection, width: number, height: number) {
   const mercY = (lat: number) => Math.log(Math.tan(Math.PI / 4 + (lat * Math.PI) / 360))
   const dx = ((maxLon - minLon) * Math.PI) / 180
   const dy = mercY(maxLat) - mercY(minLat)
-  // react-simple-maps v3 multiplies the config scale by 2*pi internally
-  // (measured: world width in px = scale * 2 * pi), so divide here to get
-  // the requested px-per-unit fit.
-  const scale = Math.min(w / dx, h / dy) / (2 * Math.PI)
+  // The config scale is passed straight to the d3 projection (pixels per
+  // radian of longitude), verified against the rendered path coordinates,
+  // so no extra conversion factor is needed.
+  const scale = Math.min(w / dx, h / dy)
   return {
     center: [(minLon + maxLon) / 2, (minLat + maxLat) / 2] as [number, number],
     scale,
