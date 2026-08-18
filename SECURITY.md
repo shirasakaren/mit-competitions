@@ -115,8 +115,23 @@ range-checked path as the GET endpoint before reaching any query.
 ## What's explicitly out of scope for this exercise
 
 - **Authentication/authorization**: the challenge defines an unauthenticated
-  public API surface; no endpoint here handles credentials, sessions, or
-  per-user access control, so there is none to secure.
+  public API surface judged by an external grader with no issued credentials;
+  no endpoint here handles credentials, sessions, or per-user access control,
+  so there is none to secure. Adding an auth layer would make every
+  judge-driven round (2-5) fail with 401 before it could score anything.
+  The same reasoning applies to `CorsLayer::permissive()`: the API carries
+  no cookies/session state, so a permissive CORS policy does not expose any
+  credentialed context — it only allows the challenge's own frontend and
+  the judge's tooling to call it from any origin, which is the point.
+  Rate limiting is delegated to Cloudflare's edge in front of the origin.
+- **Email masking in `/api/search` and `/api/duplicates`**: the challenge
+  spec requires exactly one masking rule — "no raw phone numbers in
+  response" — and Round 4's scoring verifies *exact email match detection*
+  by comparing emails between the target user and its duplicate candidates.
+  Masking candidate emails would make that verification impossible, so
+  email addresses remain visible in those two responses. The dataset is the
+  challenge's own anonymized dump (no real customer PII), and phone numbers
+  are masked even inside `/api/quality`'s data-issue examples.
 - **Rate limiting**: not implemented at the application layer; Cloudflare's
   edge provides basic DDoS/abuse protection in front of the origin, but
   `security_level` and `browser_check` were deliberately lowered from
