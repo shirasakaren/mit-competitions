@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 import * as api from './client'
 import type { SearchParams } from './client'
+import { ApiError } from './client'
 
 export function useHealth() {
   return useQuery({
@@ -28,12 +29,30 @@ export function useSearch(params: SearchParams | null) {
   })
 }
 
+/** True when the backend's analytics snapshot is still computing its first
+ * pass — /api/quality and /api/metrics return 503 WARMING_UP for ~2-3
+ * minutes after a backend restart. Consumers use this to show a
+ * "computing" state instead of treating it as a hard failure. */
+export function isWarmingUp(error: unknown): boolean {
+  return error instanceof ApiError && (error.status === 503 || error.code === 'WARMING_UP')
+}
+
+/** Retry policy for snapshot-backed queries: while the backend reports
+ * WARMING_UP, keep polling every 5s for up to ~5 minutes so the dashboard
+ * fills in on its own on the very first visit; any other error fails fast
+ * (two retries). */
+function snapshotRetry(failureCount: number, error: unknown): boolean {
+  if (isWarmingUp(error)) return failureCount < 60
+  return failureCount < 2
+}
+
 export function useQuality() {
   return useQuery({
     queryKey: ['quality'],
     queryFn: ({ signal }) => api.getQuality(signal),
     refetchInterval: 30_000,
-    retry: 2,
+    retry: snapshotRetry,
+    retryDelay: 5_000,
   })
 }
 
@@ -42,7 +61,8 @@ export function useMetrics() {
     queryKey: ['metrics'],
     queryFn: ({ signal }) => api.getMetrics(signal),
     refetchInterval: 30_000,
-    retry: 2,
+    retry: snapshotRetry,
+    retryDelay: 5_000,
   })
 }
 
