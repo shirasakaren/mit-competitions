@@ -19,7 +19,7 @@ Requires Docker + Docker Compose. No local Rust/Node toolchain needed —
 both are built inside multi-stage Docker images.
 
 ```bash
-git clone <this repo> && cd lomba-koding-17-agustus
+git clone https://github.com/shirasakaren/lomba-koding-17-agustus.git && cd lomba-koding-17-agustus
 cp .env.example .env        # fill in a real POSTGRES_PASSWORD
 docker compose up -d --build
 ```
