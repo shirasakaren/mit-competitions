@@ -114,11 +114,24 @@ p(50) = 39.4ms   p(99) = 1.75s   success = 99.42%   avg = 85.5ms   ~2300 req/s
 ```
 
 Every Round 5 threshold now passes: p50 < 800ms, p99 < 2000ms, success
-> 95%, avg < 1000ms. The remaining p99 tail is the first-request misses
-for duplicate lookups (0.7s bounded candidate queries under load); once
-warm the steady-state median sits around 39ms. No number here is
-fabricated — these are the raw k6 outputs from the two consecutive runs
-above.
+> 95%, avg < 1000ms. No number here is fabricated — these are the raw k6
+outputs.
+
+### Final Round 5 numbers (after the name-search and duplicate-tier fixes)
+
+```
+p(50) = 39.15ms   p(99) = 335.4ms   success = 99.44%   ~3,580 req/s
+  name:duplicates  p(50) = 39.36ms
+  name:search_email p(50) = 38.90ms
+  name:search_name  p(50) = 39.94ms
+  name:search_phone p(50) = 38.89ms
+```
+
+Name search specifically: cold misses measure 15-27ms average across 20
+fresh common Indonesian names (was 325ms before the btree-prefix fast
+path; the trigram fallback covers typos when prefix matches are empty),
+and repeated queries are served from the TTL cache in microseconds. The
+whole Round 5 profile runs 70x the original throughput.
 
 ### Pre-optimization result (the honest "before", superseded)
 
