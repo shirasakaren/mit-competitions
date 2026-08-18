@@ -27,7 +27,7 @@ const MAX_LIMIT: i64 = 50;
 /// duplicate lookup a bounded, indexed operation instead of a table scan —
 /// see mission "Duplicate Matching" / DATABASE_NOTES.md.
 const CANDIDATE_LIMIT_PER_SOURCE: i64 = 50;
-const DUPLICATE_QUERY_TIMEOUT_MS: &str = "1500";
+const DUPLICATE_QUERY_TIMEOUT_MS: &str = "700";
 
 #[derive(Debug, Serialize, Clone)]
 pub struct PossibleDuplicate {
@@ -110,7 +110,7 @@ async fn find_duplicates(
     sqlx::query("SET LOCAL pg_trgm.similarity_threshold = 0.45")
         .execute(&mut *tx)
         .await?;
-    sqlx::query("SET LOCAL gin_fuzzy_search_limit = 2000")
+    sqlx::query("SET LOCAL gin_fuzzy_search_limit = 500")
         .execute(&mut *tx)
         .await?;
 

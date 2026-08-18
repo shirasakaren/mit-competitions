@@ -22,7 +22,7 @@ pub async fn connect_pool(cfg: &Config) -> sqlx::Result<sqlx::PgPool> {
     PgPoolOptions::new()
         .min_connections(cfg.db_pool_min)
         .max_connections(cfg.db_pool_max)
-        .acquire_timeout(Duration::from_secs(3))
+        .acquire_timeout(Duration::from_secs(2))
         .idle_timeout(Duration::from_secs(300))
         .max_lifetime(Duration::from_secs(1800))
         .after_connect(|conn, _meta| {
