@@ -83,7 +83,8 @@ backend/src/
 | `/api/duplicates/:user_id` | GET | scored duplicate candidates for one user |
 | `/api/duplicates` | POST | Round 4 judge-compat duplicates shape (no-body fallback supported) |
 | `/api/openapi.json` | GET | machine-readable API spec |
-| `/api/docs` | GET | human-readable API docs (static HTML, no `innerHTML`) |
+| `/api/docs` | GET | interactive Swagger UI (vendored swagger-ui-dist 5.x, compiled into the binary — fully self-hosted, no CDN, no external requests) |
+| `/api/docs/assets/*` | GET | the Swagger UI css/js/favicon assets (same-origin) |
 
 ## Frontend — React / Vite / Tailwind v4 / shadcn
 
