@@ -68,6 +68,11 @@ async fn main() {
         .route("/api/duplicates", post(routes::duplicates::post_duplicates))
         .route("/api/openapi.json", get(routes::docs::openapi_json))
         .route("/api/docs", get(routes::docs::docs_page))
+        // Self-hosted Swagger UI assets — no CDN, no external requests.
+        .route("/api/docs/assets/swagger-ui.css", get(routes::docs::swagger_css))
+        .route("/api/docs/assets/swagger-ui-bundle.js", get(routes::docs::swagger_js))
+        .route("/api/docs/assets/swagger-ui-standalone-preset.js", get(routes::docs::swagger_preset_js))
+        .route("/api/docs/assets/favicon.png", get(routes::docs::swagger_favicon))
         .layer(DefaultBodyLimit::max(MAX_BODY_BYTES))
         .with_state(state)
         .layer(
