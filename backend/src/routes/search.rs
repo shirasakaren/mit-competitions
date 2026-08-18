@@ -276,7 +276,9 @@ async fn search_name(
         Ok(rows) => rows,
         Err(sqlx::Error::Database(e)) if e.code().as_deref() == Some("57014") => {
             // query_canceled (statement_timeout) — degrade gracefully.
-            tracing::warn!(query = %normalized, "name search timed out, returning empty page");
+            // Log only the query length, never the raw query text: search
+            // queries are customer-derived data and don't belong in logs.
+            tracing::warn!(query_len = normalized.chars().count(), "name search timed out, returning empty page");
             let _ = tx.rollback().await;
             return Ok((vec![], 0));
         }
