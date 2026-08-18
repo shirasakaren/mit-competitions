@@ -101,14 +101,14 @@ No external APIs, no mock fixtures, no pre-computed results. Every number you se
   <br><i>API explorer. Fire any endpoint and read the raw response.</i>
 </p>
 
-<p align="center"><img src="media/gifs/light.gif" alt="light" width="140"></p>
+<p align="center"><img src="media/gifs/light.gif" alt="light" width="100%" style="max-width:480px;border:1px solid #30363d;border-radius:12px"></p>
 
 ## Watch it in action
 
 <p align="center"><i>A 60 second tour of the console.</i></p>
 
 <div align="center">
-  <video src="media/optimized/demo.mp4" controls width="100%" style="max-width:880px;border-radius:12px;border:1px solid #30363d"></video>
+  <video src="https://raw.githubusercontent.com/shirasakaren/mit-competitions/main/media/optimized/demo.mp4" controls width="100%" style="max-width:880px;border-radius:12px;border:1px solid #30363d"></video>
 </div>
 
 ## How it works
@@ -153,7 +153,7 @@ curl -s "https://mit.creations.ren/api/duplicates/21003474?threshold=0.5"
 
 ## Performance, measured
 
-<p align="center"><img src="media/gifs/rock-shooter.gif" alt="load test" width="140"></p>
+<p align="center"><img src="media/gifs/rock-shooter.gif" alt="load test" width="100%" style="max-width:480px;border:1px solid #30363d;border-radius:12px"></p>
 
 | Round | Target | Result |
 |---|---|---|
@@ -165,7 +165,7 @@ curl -s "https://mit.creations.ren/api/duplicates/21003474?threshold=0.5"
 
 The p99 miss is the honest part. The whole story is in [PERFORMANCE.md](PERFORMANCE.md): a 44 second query plan bug fixed to 0.2 ms, a background job CPU bug found by sampling `pg_stat_activity` during a live test, and every number behind this table.
 
-<p align="center"><img src="media/gifs/cry.gif" alt="p99" width="140"></p>
+<p align="center"><img src="media/gifs/cry.gif" alt="p99" width="100%" style="max-width:480px;border:1px solid #30363d;border-radius:12px"></p>
 
 ## Quick start
 
@@ -183,7 +183,7 @@ curl -s http://localhost/health | jq
 scripts/api_check.sh        # 22 end to end checks
 ```
 
-<p align="center"><img src="media/gifs/kawaii.gif" alt="welcome" width="140"></p>
+<p align="center"><img src="media/gifs/kawaii.gif" alt="welcome" width="100%" style="max-width:480px;border:1px solid #30363d;border-radius:12px"></p>
 
 <p align="center"><i>Welcome aboard.</i></p>
 
