@@ -231,7 +231,7 @@ export default function System() {
               Send a live request to any endpoint and inspect the raw response.
             </p>
           </div>
-          {result.status === 'loading' && <AppLottie src={ANIM.gears} size={32} className="shrink-0" />}
+          {result.status === 'loading' && <AppLottie src={ANIM.boxCubeLoader} size={36} className="shrink-0" />}
         </div>
 
         <div className="flex flex-col gap-3">
@@ -328,7 +328,11 @@ export default function System() {
             <div className="flex flex-col gap-2">
               <div className="flex flex-wrap items-center gap-2 text-xs">
                 <span className="inline-flex items-center gap-1.5">
-                  <StatusDot tone={result.status === 'success' ? 'green' : 'red'} />
+                  {result.status === 'success' ? (
+                    <AppLottie src={ANIM.done} size={14} />
+                  ) : (
+                    <StatusDot tone="red" />
+                  )}
                   {result.status === 'success'
                     ? 'Success'
                     : `Error${result.status === 'error' && result.httpStatus ? ` ${result.httpStatus}` : ''}`}
@@ -359,11 +363,14 @@ export default function System() {
       </Card>
 
       <Card className="flex flex-col gap-3 p-4 sm:p-5">
-        <div>
-          <h3 className="font-semibold tracking-tight">Documentation</h3>
-          <p className="text-xs text-muted-foreground">
-            Full OpenAPI reference and an interactive explorer, served directly by the backend.
-          </p>
+        <div className="flex items-center gap-3">
+          <AppLottie src={ANIM.hacker} size={44} className="hidden shrink-0 sm:block" />
+          <div>
+            <h3 className="font-semibold tracking-tight">Documentation</h3>
+            <p className="text-xs text-muted-foreground">
+              Full OpenAPI reference and an interactive explorer, served directly by the backend.
+            </p>
+          </div>
         </div>
         <div className="flex flex-wrap gap-2">
           <Button asChild variant="outline" size="sm">
