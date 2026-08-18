@@ -56,6 +56,16 @@ export function useQuality() {
   })
 }
 
+export function useAnalytics() {
+  return useQuery({
+    queryKey: ['analytics'],
+    queryFn: ({ signal }) => api.getAnalytics(signal),
+    refetchInterval: 30_000,
+    retry: snapshotRetry,
+    retryDelay: 5_000,
+  })
+}
+
 export function useMetrics() {
   return useQuery({
     queryKey: ['metrics'],
