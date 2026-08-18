@@ -355,9 +355,17 @@ async fn search_name(
 
     let mut rows = phase1;
 
-    if (rows.len() as i64) < limit {
-        // Phase 2 (fuzzy fallback): trigram similarity scan for the
-        // remaining slots. Bounded by the statement_timeout set above.
+    if rows.is_empty() {
+        // Phase 2 (fuzzy fallback): trigram similarity scan, ONLY when the
+        // prefix path found nothing at all. Any prefix match is by
+        // definition a strong match, so topping up with fuzzy candidates
+        // would add hundreds of milliseconds of trigram scan for rows the
+        // ranking would place below the prefix ones anyway. Give the
+        // fallback its own tighter budget so typo queries degrade fast
+        // instead of eating the request window.
+        sqlx::query("SET LOCAL statement_timeout = '300'")
+            .execute(&mut *tx)
+            .await?;
         let phase2 = sqlx::query(
             "SELECT user_id, full_name, user_email, msisdn, status, create_time AS created_at,
                     similarity(LOWER(full_name), $1) AS sim
