@@ -24,7 +24,7 @@ use sqlx::{PgPool, Row};
 use std::sync::Arc;
 use tokio::sync::watch;
 
-use crate::domain::mask::mask_phone;
+use crate::domain::mask::{mask_email, mask_phone};
 
 #[derive(Debug, Clone, Serialize)]
 pub struct EmailQuality {
@@ -359,7 +359,12 @@ pub async fn compute_snapshot(pool: &PgPool) -> sqlx::Result<QualitySnapshot> {
             field: "email",
             issue_type: "invalid_format",
             count: cheap.email_invalid,
-            examples: email_examples,
+            // Masked like the phone examples: the quality console doesn't
+            // need raw values to illustrate a malformed email, and masking
+            // keeps the whole /api/quality response free of unmasked
+            // contact data. (Search/duplicates emails stay unmasked on
+            // purpose — see SECURITY.md.)
+            examples: email_examples.iter().map(|e| mask_email(e)).collect(),
             severity: "medium",
         });
     }

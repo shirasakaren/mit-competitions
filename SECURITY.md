@@ -130,8 +130,9 @@ range-checked path as the GET endpoint before reaching any query.
   by comparing emails between the target user and its duplicate candidates.
   Masking candidate emails would make that verification impossible, so
   email addresses remain visible in those two responses. The dataset is the
-  challenge's own anonymized dump (no real customer PII), and phone numbers
-  are masked even inside `/api/quality`'s data-issue examples.
+  challenge's own anonymized dump (no real customer PII), and everywhere
+  else is stricter: `/api/quality` masks both its malformed-phone examples
+  and its invalid-email examples before serializing them.
 - **Rate limiting**: not implemented at the application layer; Cloudflare's
   edge provides basic DDoS/abuse protection in front of the origin, but
   `security_level` and `browser_check` were deliberately lowered from
