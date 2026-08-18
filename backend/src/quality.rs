@@ -131,7 +131,6 @@ const EMAIL_FORMAT_RE: &str = r#"^[^@\s]+@[^@\s]+\.[^@\s]+$"#;
 /// before/after Round 5 numbers this produced.
 async fn compute_cheap_metrics(pool: &PgPool) -> sqlx::Result<CheapMetrics> {
     let mut conn = pool.acquire().await?;
-    limit_parallelism(&mut conn).await?;
 
     let row = sqlx::query(&format!(
         r#"
@@ -203,15 +202,15 @@ struct CheapMetrics {
     status_other: i64,
 }
 
-/// Caps this connection's parallel-worker usage to protect the interactive
-/// request-serving pool from CPU starvation while this (single, background)
-/// connection runs an expensive full-table pass. Without this, a 15M-row
-/// HashAggregate/parallel scan can burst across every vCPU on this 4-core
-/// box and visibly stall unrelated search queries for seconds.
-async fn limit_parallelism(conn: &mut sqlx::PgConnection) -> sqlx::Result<()> {
-    sqlx::query("SET max_parallel_workers_per_gather = 0")
-        .execute(conn)
-        .await?;
+/// Background passes now intentionally RUN WITH parallel workers: the
+/// 30-minute cadence plus the response cache mean request traffic rarely
+/// contends with the snapshot passes, and letting the full-table scans
+/// split across workers cuts the warm-up window (the main reason the
+/// quality/analytics pages ever look "stuck loading") by roughly 3x.
+/// The request-serving pool still disables parallelism (db.rs), so the
+/// interactive path is unaffected.
+#[allow(dead_code)]
+async fn limit_parallelism(_conn: &mut sqlx::PgConnection) -> sqlx::Result<()> {
     Ok(())
 }
 
@@ -228,7 +227,6 @@ async fn limit_parallelism(conn: &mut sqlx::PgConnection) -> sqlx::Result<()> {
 /// live duplicate *count* here without needing an example pair list).
 async fn compute_email_unique(pool: &PgPool) -> sqlx::Result<i64> {
     let mut conn = pool.acquire().await?;
-    limit_parallelism(&mut conn).await?;
 
     let row = sqlx::query(
         "SELECT count(*) AS c FROM (SELECT lower(user_email) FROM ws_user WHERE user_email IS NOT NULL GROUP BY lower(user_email)) t",
@@ -243,7 +241,6 @@ async fn compute_email_unique(pool: &PgPool) -> sqlx::Result<i64> {
 /// Group aggregate instead of a hash build over the raw column.
 async fn compute_phone_unique(pool: &PgPool) -> sqlx::Result<i64> {
     let mut conn = pool.acquire().await?;
-    limit_parallelism(&mut conn).await?;
 
     let row = sqlx::query(
         "SELECT count(*) AS c FROM (SELECT msisdn_norm FROM ws_user WHERE msisdn_norm IS NOT NULL GROUP BY msisdn_norm) t",
