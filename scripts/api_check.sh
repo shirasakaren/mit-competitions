@@ -56,7 +56,13 @@ check "name fuzzy search returns rows" "True" "$(python3 -c "
 import json,sys; d=json.load(sys.stdin); print(len(d['results'])>0)" <<<"$BODY")"
 
 echo "== Round 3: quality & metrics =="
-BODY="$(curl -sf "$BASE_URL/api/quality")"
+# The background quality snapshot takes ~2-3 minutes to compute its first
+# pass after a backend restart; poll for readiness instead of failing.
+BODY=""
+for _ in 1 2 3 4 5 6 7 8 9 10 11 12; do
+  BODY="$(curl -sf "$BASE_URL/api/quality")" && break
+  sleep 10
+done
 check "quality total_records" "14999896" "$(echo "$BODY" | json_field total_records)"
 
 BODY="$(curl -sf "$BASE_URL/api/metrics")"
