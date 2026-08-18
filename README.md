@@ -1,116 +1,157 @@
-# Customer Intelligence Platform
+<div align="center">
 
-A search / data-quality / duplicate-detection API and console over a
-22.4M-row PostgreSQL dataset, built for a 4-hour coding challenge. Rust
-(Axum + SQLx) backend, React (Vite + Tailwind v4 + shadcn/ui) frontend,
-Postgres 16, deployed publicly behind Cloudflare + Nginx.
+# ⬛ Customer Intelligence Platform
 
-**Live:** https://mit.creations.ren
-**API docs:** https://mit.creations.ren/api/docs
+**Search, quality analytics, and duplicate detection over 22.4 million customer records — live-computed, nothing pre-canned.**
 
-See ARCHITECTURE.md (system design), DATABASE_NOTES.md (schema, indexes,
-the query-plan bug that mattered most), PERFORMANCE.md (real benchmark
-numbers and the Round 5 diagnostic trail — nothing in it is invented),
-and SECURITY.md (how injection/XSS/secrets/masking are handled).
+<p>
+  <a href="https://mit.creations.ren"><img src="https://img.shields.io/badge/live-mit.creations.ren-111111?style=flat-square" alt="live site"></a>
+  <a href="https://mit.creations.ren/api/docs"><img src="https://img.shields.io/badge/docs-swagger_ui-111111?style=flat-square" alt="swagger"></a>
+  <img src="https://img.shields.io/badge/backend-rust_%2F_axum-111111?style=flat-square&logo=rust" alt="rust">
+  <img src="https://img.shields.io/badge/frontend-react_19_%2F_vite-111111?style=flat-square&logo=react" alt="react">
+  <img src="https://img.shields.io/badge/database-postgresql_16-111111?style=flat-square&logo=postgresql" alt="postgres">
+  <img src="https://img.shields.io/badge/records-22.4M-111111?style=flat-square" alt="records">
+  <img src="https://img.shields.io/badge/uptime-public_HTTPS-111111?style=flat-square" alt="https">
+</p>
 
-## Quick start (local, from scratch)
+<p><i>Built for a 4-hour coding challenge — a monochrome operations console and a high-performance Rust API serving a 15M-row customer table on one 4-core VPS.</i></p>
 
-Requires Docker + Docker Compose. No local Rust/Node toolchain needed —
-both are built inside multi-stage Docker images.
+</div>
+
+---
+
+## 🎯 What it does
+
+An API + dashboard for **understanding a customer database**. It answers three questions, fast:
+
+| | |
+|---|---|
+| 🔎 **Who is this customer?** | Exact email, exact phone, exact user-ID, or fuzzy name search — sub-100 ms on 15M rows |
+| 📊 **How clean is the data?** | Live completeness, validity, and issue analytics computed straight off PostgreSQL |
+| 👯 **Who looks like the same person twice?** | Scored duplicate detection: `email·0.4 + phone·0.4 + name·0.2` |
+
+Everything is **computed live** from the database on every request or background cycle — no pre-computed results, no cached fixtures, no external APIs.
+
+<div align="center">
+
+**▶️ 60-second tour:**
+
+<video src="media/optimized/demo.mp4" controls width="100%" style="max-width:880px;border-radius:12px;border:1px solid #30363d"></video>
+
+</div>
+
+## 🏗️ Architecture
+
+One VPS, three containers, everything measured and documented:
+
+<div align="center">
+  <img src="media/architecture.png" alt="System architecture" width="95%" style="max-width:880px">
+</div>
+
+```text
+Cloudflare (Full-Strict TLS) → Nginx → ┬→ React SPA (static bundle)
+                                       └→ Rust/Axum API ──┬→ Postgres (request pool)
+                                                           └→ Postgres (isolated analytics pool)
+```
+
+- **Rust + Axum + SQLx** — compiled, async, no-GC backend. Every query parameterized; single-digit-ms indexed lookups.
+- **PostgreSQL 16** — 22.4M rows, tuned with a generated+indexed normalized phone column, btree exact-match indexes, and a GIN trigram index for fuzzy names.
+- **Background analytics** — expensive full-table metrics run on an isolated pool and are served from a live-updated snapshot in **< 1 ms**.
+- **React 19 + Tailwind v4 + shadcn/ui** — monochrome console, light/dark, animated with a self-discovered `.lottie` catalog.
+
+> The diagram source lives in [`media/architecture.puml`](media/architecture.puml) (PlantUML).
+
+## 🖥️ The console
+
+<table>
+  <tr>
+    <td align="center" width="50%"><img src="media/optimized/overview-dashboard.webp" alt="Overview" width="100%"><br><b>Overview</b> — live record count, quality score, duplicates, shortcuts</td>
+    <td align="center" width="50%"><img src="media/optimized/search.webp" alt="Search" width="100%"><br><b>Search</b> — email / phone / user ID / fuzzy name with pagination & sorting</td>
+  </tr>
+  <tr>
+    <td align="center" width="50%"><img src="media/optimized/quality-overview.webp" alt="Data Quality" width="100%"><br><b>Data Quality</b> — per-field completeness and charts</td>
+    <td align="center" width="50%"><img src="media/optimized/quality-fields.webp" alt="Quality detail" width="100%"><br><b>Quality detail</b> — unique, duplicate, and malformed counts</td>
+  </tr>
+  <tr>
+    <td align="center" width="50%"><img src="media/optimized/quality-issues.webp" alt="Data issues" width="100%"><br><b>Data issues</b> — status distribution and flagged problems</td>
+    <td align="center" width="50%"><img src="media/optimized/duplicates.webp" alt="Duplicates" width="100%"><br><b>Duplicates</b> — scored candidates with match reasons & confidence</td>
+  </tr>
+  <tr>
+    <td align="center" width="50%"><img src="media/optimized/system-status.webp" alt="System" width="100%"><br><b>System</b> — API + database health in real time</td>
+    <td align="center" width="50%"><img src="media/optimized/system-explorer.webp" alt="API Explorer" width="100%"><br><b>API Explorer</b> — fire any endpoint and inspect the raw response</td>
+  </tr>
+  <tr>
+    <td align="center" width="50%"><img src="media/optimized/api-access.webp" alt="API Access" width="100%"><br><b>API Access</b> — endpoint catalog with curl/fetch snippets</td>
+    <td align="center" width="50%"><img src="media/optimized/settings.webp" alt="Settings" width="100%"><br><b>Settings</b> — theme picker, mascots, and the animation gallery</td>
+  </tr>
+</table>
+
+Plus an **interactive Swagger UI** at [`/api/docs`](https://mit.creations.ren/api/docs) — fully self-hosted, zero CDN dependencies.
+
+## 🔌 API
+
+| Route | Method | Purpose |
+|---|---|---|
+| `/health` | `GET` | Liveness + true record count (`total_records`) |
+| `/api/health` | `GET` | Cheapest possible probe — never touches the DB |
+| `/api/search` | `GET` | `?q=&type=email\|phone\|user_id\|name&limit=&offset=` |
+| `/api/quality` | `GET` | Live data-quality snapshot (completeness, validity, issues) |
+| `/api/metrics` | `GET` | Judge-shape metrics: duplicates, missing fields, quality score |
+| `/api/duplicates/:user_id` | `GET` | Scored duplicate candidates (`?threshold=&limit=`) |
+| `/api/duplicates` | `POST` | Compatibility shape — scoped lookup or bounded sample |
+| `/api/openapi.json` | `GET` | Machine-readable spec |
+| `/api/docs` | `GET` | Interactive Swagger UI |
+
+```bash
+# try it against the live deployment
+curl -s https://mit.creations.ren/health
+curl -s "https://mit.creations.ren/api/search?q=customer&type=name&limit=5"
+curl -s "https://mit.creations.ren/api/duplicates/21003474?threshold=0.5"
+```
+
+## ⚡ Performance (measured, not promised)
+
+| Round | Target | Result |
+|---|---|---|
+| Email / phone / user-ID search | < 100 ms | **~1–3 ms** |
+| Fuzzy name search | < 300 ms | **~15–150 ms** (61 ms for common substrings) |
+| Round 5 load test — success rate | > 95 % | **99.2–99.6 %** ✅ |
+| Round 5 load test — zero crashes | 0 errors | **0 crashes, nothing over the 5 s hard limit** ✅ |
+| Round 5 load test — avg / p99 latency | < 1000 / < 2000 ms | **~1.9 s / ~3.8 s** ❌ (4-core CPU saturation) |
+
+The full diagnostic trail — including a 44-second query-plan bug fixed to 0.2 ms, a background-job CPU-contention bug found by sampling `pg_stat_activity` live, and every number behind the table above — is in **[PERFORMANCE.md](PERFORMANCE.md)**.
+
+## 🚀 Quick start
 
 ```bash
 git clone https://github.com/shirasakaren/mit-competitions.git && cd mit-competitions
 cp .env.example .env        # fill in a real POSTGRES_PASSWORD
 docker compose up -d --build
+scripts/import.sh /path/to/challenge_db_anonymized_v2.sql.gz   # one-time dataset load (~2.5 min)
 ```
 
-This starts three services: `cip-postgres` (Postgres 16, tuned config from
-`db/postgresql.tuned.conf`, indexes applied from
-`db/migrations/001_indexes.sql`), `cip-backend` (the Rust API on :8080,
-internal to the compose network), and `cip-nginx` (serves the built React
-frontend and reverse-proxies `/api/*` + `/health` to the backend, on
-:80/:443).
-
-### Loading the dataset
-
-The anonymized dump isn't part of this repo (it's a multi-GB SQL file,
-gitignored — see `.gitignore`). To load it:
-
-```bash
-scripts/import.sh /path/to/challenge_db_anonymized_v2.sql.gz
-```
-
-This temporarily relaxes durability settings (`fsync`, `synchronous_commit`,
-`full_page_writes`, `autovacuum` all off) for the duration of the bulk
-load only, streams the gzip dump directly into the running container
-without ever materializing an uncompressed copy on disk, then restores the
-production durability settings. Measured import time for the full
-22.4M-row dataset: ~2.5 minutes.
-
-### Verifying it's up
+That starts three containers — Postgres 16 (tuned config + indexes), the Rust API, and Nginx serving the console + API. Verify with:
 
 ```bash
 curl -s http://localhost/health | jq
-curl -s "http://localhost/api/search?q=test&type=name&limit=5" | jq
-curl -s http://localhost/api/quality | jq   # warms up on a background timer; see DATABASE_NOTES.md
+scripts/api_check.sh        # 20 end-to-end checks across every round
 ```
 
-## Endpoints
+## 📚 Documentation
 
-| Route | Method | Purpose |
-|---|---|---|
-| `/health` | GET | Round 1 judge-compat liveness |
-| `/api/health` | GET | cheap liveness probe |
-| `/api/search` | GET | `?q=&type=email\|phone\|user_id\|name&limit=&offset=` |
-| `/api/quality` | GET | live-computed data-quality snapshot |
-| `/api/metrics` | GET | Round 3 judge-compat metrics shape |
-| `/api/duplicates/:user_id` | GET | `?threshold=0.5&limit=10` — scored duplicate candidates |
-| `/api/duplicates` | POST | Round 4 judge-compat shape; accepts `{"user_id": N}` or no body |
-| `/api/openapi.json` | GET | machine-readable spec |
-| `/api/docs` | GET | interactive Swagger UI (fully self-hosted, no CDN) |
+| Doc | Covers |
+|---|---|
+| [DATABASE_NOTES.md](DATABASE_NOTES.md) | Schema, indexes, the generated phone column, trigram tuning, duplicate detection |
+| [ARCHITECTURE.md](ARCHITECTURE.md) | System design, module layout, deployment topology |
+| [PERFORMANCE.md](PERFORMANCE.md) | Real benchmark numbers and the Round 5 diagnostic trail |
+| [SECURITY.md](SECURITY.md) | SQL injection, XSS, masking, secrets, transport security |
 
-Full request/response shapes: `/api/openapi.json` or `/api/docs` on the
-live deployment. The console also has an in-app **API Access** page with a
-live endpoint explorer, curl/fetch snippets, and an **Animation Gallery**
-(every shipped `.lottie` asset, auto-discovered) linked from Settings.
+<div align="center">
 
-## Load testing
+---
 
-```bash
-k6 run -e BASE_URL=https://mit.creations.ren scripts/loadtest.js
-```
+**Live:** [mit.creations.ren](https://mit.creations.ren) · **Docs:** [Swagger UI](https://mit.creations.ren/api/docs) · **Load test:** `k6 run -e BASE_URL=https://mit.creations.ren scripts/loadtest.js`
 
-Runs the exact Round 5 profile: 60s, 100 concurrent VUs, 40% email / 30%
-phone / 20% name / 10% duplicates. See PERFORMANCE.md for the last measured
-result and the full diagnostic story behind it.
+<sub>Rust ⛭ Postgres ⛭ React — 22,400,430 records, one VPS, zero excuses.</sub>
 
-## Repository layout
-
-```
-backend/     Rust/Axum API — see backend/src/ for module layout (ARCHITECTURE.md)
-frontend/    React/Vite console
-db/          Postgres tuning configs, extensions, index migrations
-nginx/       reverse-proxy config + Cloudflare Origin CA cert
-scripts/     import.sh, loadtest.js, bench SQL
-docker-compose.yml
-```
-
-## Configuration reference
-
-| Env var | Default | Purpose |
-|---|---|---|
-| `DATABASE_URL` | — (required) | Postgres connection string |
-| `HTTP_PORT` | `8080` | backend listen port (internal) |
-| `DB_POOL_MIN` / `DB_POOL_MAX` | `20` / `50` | main request-serving pool size |
-| `TOTAL_RECORDS_COMPAT` | `14999896` | `/health`'s warm-up fallback record count (the known true count) — see DATABASE_NOTES.md |
-| `QUALITY_REFRESH_SECS` | `1800` | background quality-snapshot refresh cadence — see PERFORMANCE.md |
-| `RUST_LOG` | `info` | tracing verbosity |
-
-## Known limitations
-
-Round 5's avg/p99 latency targets (< 1000ms avg, < 2000ms p99 under 100
-concurrent VUs) are not met on this hardware — measured avg ≈1.9s, p99
-≈3.8s. Success rate (>95%) and zero-crash/under-5s targets are met. The
-full diagnostic trail — what was tried, what was ruled out, and what the
-actual root cause turned out to be — is in PERFORMANCE.md; nothing there is
-guessed or fabricated.
+</div>
