@@ -2,6 +2,8 @@ import { useState } from 'react'
 import { Outlet, useLocation } from 'react-router-dom'
 import { Database } from 'lucide-react'
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet'
+import { AppLottie } from '@/components/app/AppLottie'
+import { ANIM } from '@/lib/animations'
 import { SidebarNav } from './SidebarNav'
 import { Topbar } from './Topbar'
 import { CommandPalette } from './CommandPalette'
@@ -28,7 +30,8 @@ export function AppShell() {
         <div className="flex-1 overflow-y-auto py-3">
           <SidebarNav />
         </div>
-        <div className="border-t px-4 py-3 text-xs text-muted-foreground">
+        <div className="flex items-center gap-2 border-t px-4 py-3 text-xs text-muted-foreground">
+          <AppLottie src={ANIM.walkingTaco} size={22} />
           v1.0 · 22.4M records
         </div>
       </aside>
