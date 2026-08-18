@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { Search, ShieldCheck, Copy, Activity, ArrowRight } from 'lucide-react'
+import { Search, ShieldCheck, Copy, Activity, TerminalSquare, ArrowRight } from 'lucide-react'
 import { Card } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import { AppLottie } from '@/components/app/AppLottie'
@@ -38,6 +38,7 @@ const SHORTCUTS = [
   { to: '/quality', label: 'Data quality', desc: 'Completeness, validity, issues', icon: ShieldCheck },
   { to: '/duplicates', label: 'Duplicate detection', desc: 'Similarity scoring & confidence', icon: Copy },
   { to: '/system', label: 'System status', desc: 'API health & performance', icon: Activity },
+  { to: '/api-access', label: 'API access', desc: 'Explorer, snippets, Swagger docs', icon: TerminalSquare },
 ]
 
 export default function Overview() {
@@ -87,7 +88,7 @@ export default function Overview() {
           <AppLottie src={ANIM.rocketLaunch} size={24} />
           <h3 className="text-sm font-semibold text-muted-foreground">Jump to</h3>
         </div>
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-5">
           {SHORTCUTS.map((s) => (
             <Link key={s.to} to={s.to}>
               <Card className="group flex h-full flex-col justify-between p-4 transition-colors hover:border-foreground/30">
