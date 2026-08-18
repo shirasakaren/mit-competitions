@@ -332,7 +332,7 @@ async fn top_spenders(pool: &PgPool) -> sqlx::Result<Vec<TopSpender>> {
             name
         });
     }
-    let names = futures_util_join_all(name_futures).await;
+    let names = futures::future::join_all(name_futures).await;
     for (r, name) in rows.iter().zip(names) {
         let user_id: i64 = r.try_get("user_id")?;
         spenders.push(TopSpender {
