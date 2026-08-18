@@ -42,6 +42,7 @@ type EndpointKey =
   | 'search'
   | 'quality'
   | 'metrics'
+  | 'analytics'
   | 'duplicatesGet'
   | 'duplicatesPost'
 
@@ -51,6 +52,7 @@ const ENDPOINTS: { key: EndpointKey; label: string }[] = [
   { key: 'search', label: 'GET /api/search' },
   { key: 'quality', label: 'GET /api/quality' },
   { key: 'metrics', label: 'GET /api/metrics' },
+  { key: 'analytics', label: 'GET /api/analytics' },
   { key: 'duplicatesGet', label: 'GET /api/duplicates/:id' },
   { key: 'duplicatesPost', label: 'POST /api/duplicates' },
 ]
@@ -110,6 +112,9 @@ export default function System() {
           break
         case 'metrics':
           body = await api.getMetrics()
+          break
+        case 'analytics':
+          body = await api.getAnalytics()
           break
         case 'duplicatesGet':
           body = await api.getDuplicates(dupIdNum, {

@@ -85,6 +85,13 @@ const ENDPOINTS: EndpointDef[] = [
   },
   {
     method: 'GET',
+    path: '/api/analytics',
+    title: 'Analytics snapshot',
+    description: 'Growth, demographics, revenue, top spenders, and an activity heatmap.',
+    params: [],
+  },
+  {
+    method: 'GET',
     path: '/api/openapi.json',
     title: 'OpenAPI spec',
     description: 'The machine-readable specification of every endpoint above.',
@@ -179,6 +186,9 @@ function EndpointCard({ def }: { def: EndpointDef }) {
           break
         case '/api/metrics':
           body = await api.getMetrics()
+          break
+        case '/api/analytics':
+          body = await api.getAnalytics()
           break
         case '/api/duplicates/{id}':
           body = await api.getDuplicates(Number(valueFor('id')), {
