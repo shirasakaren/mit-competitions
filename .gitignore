@@ -10,6 +10,8 @@ id_rsa*
 *.sql.gz
 *.sql
 challenge_db_anonymized_v2.sql.gz
+challenge_db_anonymized_v3.sql.gz
+challenge_db_anonymized_v3.sql
 
 # Rust
 target/
