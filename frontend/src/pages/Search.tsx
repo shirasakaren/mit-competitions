@@ -145,7 +145,7 @@ export default function Search() {
       {trimmed && isLoading && (
         <Card className="p-4">
           <div className="mb-3 flex items-center gap-2 text-sm text-muted-foreground">
-            <AppLottie src={ANIM.loader} size={20} className="!size-5" />
+            <AppLottie src={ANIM.filesSearching} size={28} />
             Searching…
           </div>
           {Array.from({ length: 5 }).map((_, i) => (
@@ -155,17 +155,20 @@ export default function Search() {
       )}
 
       {trimmed && isError && (
-        <Alert variant="destructive">
-          <AlertTitle>{error instanceof ApiError ? error.code : 'Search failed'}</AlertTitle>
-          <AlertDescription>
-            {error instanceof ApiError ? error.message : 'An unexpected error occurred.'}
-          </AlertDescription>
+        <Alert variant="destructive" className="items-center">
+          <AppLottie src={ANIM.warning} size={36} className="mr-2" />
+          <div>
+            <AlertTitle>{error instanceof ApiError ? error.code : 'Search failed'}</AlertTitle>
+            <AlertDescription>
+              {error instanceof ApiError ? error.message : 'An unexpected error occurred.'}
+            </AlertDescription>
+          </div>
         </Alert>
       )}
 
       {trimmed && !isLoading && !isError && data && data.results.length === 0 && (
         <div className="flex flex-col items-center gap-3 py-16 text-center">
-          <AppLottie src={ANIM.crowPeople} size={140} />
+          <AppLottie src={ANIM.empty} size={130} />
           <p className="text-sm font-medium">No results found</p>
           <p className="text-sm text-muted-foreground">Try a different query or search type.</p>
         </div>
