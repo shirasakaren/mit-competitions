@@ -8,7 +8,8 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { useTheme } from '@/app/providers/theme'
 import { useApiHealth } from '@/lib/api/hooks'
-import { cn } from '@/lib/utils'
+import { AppLottie } from '@/components/app/AppLottie'
+import { ANIM } from '@/lib/animations'
 
 function ThemeToggle() {
   const { preference, setPreference } = useTheme()
@@ -41,12 +42,11 @@ function StatusPill() {
   const ok = !!data?.ok && !isError
   return (
     <div className="hidden items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs text-muted-foreground sm:flex">
-      <span
-        className={cn(
-          'size-1.5 rounded-full',
-          ok ? 'bg-emerald-500' : 'bg-amber-500 animate-pulse',
-        )}
-      />
+      {ok ? (
+        <AppLottie src={ANIM.done} size={14} />
+      ) : (
+        <AppLottie src={ANIM.processing} size={14} />
+      )}
       {ok ? 'API online' : 'Connecting…'}
     </div>
   )
