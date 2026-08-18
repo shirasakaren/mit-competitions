@@ -2,6 +2,7 @@ import { useMemo } from 'react'
 import { Sun, Moon, Monitor } from 'lucide-react'
 import { Card } from '@/components/ui/card'
 import { cn } from '@/lib/utils'
+import { Link } from 'react-router-dom'
 import { useTheme } from '@/app/providers/theme'
 import { AppLottie } from '@/components/app/AppLottie'
 import { ANIM } from '@/lib/animations'
@@ -66,6 +67,9 @@ export default function Settings() {
       <Card className="flex flex-col items-center gap-2 p-6 text-center">
         <AppLottie src={funAnim} size={110} />
         <p className="text-xs text-muted-foreground">You found a friend. Refresh for another.</p>
+        <Link to="/gallery" className="text-xs text-muted-foreground underline underline-offset-4 hover:text-foreground">
+          View the full animation gallery
+        </Link>
       </Card>
     </div>
   )
