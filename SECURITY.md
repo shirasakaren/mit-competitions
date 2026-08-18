@@ -35,11 +35,11 @@ vector:
   `ChartStyle` helper, which renders a `<style>` block built only from a
   developer-authored color-config object at compile time — never database
   or request-derived content (see ARCHITECTURE.md).
-- **`GET /api/docs`** (the static API documentation page) builds its DOM
-  entirely via `document.createElement(...)` / `.textContent = ...` helper
-  functions (`el()`, `pre()`), never `innerHTML`, so even though it renders
-  the OpenAPI spec's field descriptions dynamically, no string is ever
-  parsed as HTML.
+- **`GET /api/docs`** (the interactive API documentation page) is a Swagger
+  UI bootstrap that fetches `/api/openapi.json` as a JSON object and hands
+  it to `SwaggerUIBundle` as data — this page never builds HTML from
+  response strings, and its error path renders via `createElement` /
+  `textContent` only. All Swagger assets are vendored same-origin (no CDN).
 
 ## Sensitive-data masking
 
