@@ -440,12 +440,20 @@ impl QualityCache {
     }
 }
 
-/// Spawns the background refresh loop and returns a cheap read handle.
-/// The first computation runs immediately (blocking readiness of the cache,
-/// not of the HTTP server itself) so the cache is warm within one cycle of
-/// process startup.
-pub fn spawn_refresher(pool: PgPool, refresh_interval_secs: u64) -> QualityCache {
+/// Spawns the background refresh loop and returns cheap read handles for
+/// both snapshots it maintains. The first computation runs immediately
+/// (blocking readiness of the caches, not of the HTTP server itself) so the
+/// caches are warm within one cycle of process startup.
+///
+/// Each cycle computes the quality snapshot first, then the analytics
+/// snapshot — sequentially, on the same isolated pool, so the two expensive
+/// passes never overlap each other or the request-serving traffic.
+pub fn spawn_refresher(
+    pool: PgPool,
+    refresh_interval_secs: u64,
+) -> (QualityCache, crate::analytics::AnalyticsCache) {
     let (tx, rx) = watch::channel(None);
+    let (analytics_tx, analytics_cache) = crate::analytics::analytics_channel();
 
     tokio::spawn(async move {
         loop {
@@ -462,9 +470,23 @@ pub fn spawn_refresher(pool: PgPool, refresh_interval_secs: u64) -> QualityCache
                     tracing::error!(error = %e, "quality snapshot computation failed");
                 }
             }
+
+            match crate::analytics::compute_analytics_snapshot(&pool).await {
+                Ok(snapshot) => {
+                    tracing::info!(
+                        computation_ms = snapshot.computation_ms,
+                        "analytics snapshot refreshed"
+                    );
+                    let _ = analytics_tx.send(Some(Arc::new(snapshot)));
+                }
+                Err(e) => {
+                    tracing::error!(error = %e, "analytics snapshot computation failed");
+                }
+            }
+
             tokio::time::sleep(std::time::Duration::from_secs(refresh_interval_secs)).await;
         }
     });
 
-    QualityCache { rx }
+    (QualityCache { rx }, analytics_cache)
 }

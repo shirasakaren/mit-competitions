@@ -1,3 +1,4 @@
+mod analytics;
 mod config;
 mod db;
 mod domain;
@@ -46,12 +47,14 @@ async fn main() {
         .await
         .expect("failed to connect analytics pool");
 
-    let quality_cache = quality::spawn_refresher(analytics_pool, cfg.quality_refresh_interval_secs);
+    let (quality_cache, analytics_cache) =
+        quality::spawn_refresher(analytics_pool, cfg.quality_refresh_interval_secs);
 
     let state = AppState {
         pool,
         config: std::sync::Arc::new(cfg.clone()),
         quality: quality_cache,
+        analytics: analytics_cache,
         started_at: std::time::Instant::now(),
     };
 
@@ -61,6 +64,7 @@ async fn main() {
         .route("/api/search", get(routes::search::search))
         .route("/api/quality", get(routes::quality::quality))
         .route("/api/metrics", get(routes::metrics::metrics))
+        .route("/api/analytics", get(routes::analytics::analytics))
         .route(
             "/api/duplicates/{user_id}",
             get(routes::duplicates::get_duplicates),

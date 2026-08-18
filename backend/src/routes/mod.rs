@@ -1,3 +1,4 @@
+pub mod analytics;
 pub mod docs;
 pub mod duplicates;
 pub mod health;
