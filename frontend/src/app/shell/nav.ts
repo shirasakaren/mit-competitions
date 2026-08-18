@@ -4,6 +4,7 @@ import {
   ShieldCheck,
   Copy,
   Activity,
+  TerminalSquare,
   Settings,
   type LucideIcon,
 } from 'lucide-react'
@@ -21,5 +22,6 @@ export const NAV_ITEMS: NavItem[] = [
   { to: '/quality', label: 'Data Quality', icon: ShieldCheck },
   { to: '/duplicates', label: 'Duplicates', icon: Copy },
   { to: '/system', label: 'System', icon: Activity },
+  { to: '/api-access', label: 'API Access', icon: TerminalSquare },
   { to: '/settings', label: 'Settings', icon: Settings },
 ]
