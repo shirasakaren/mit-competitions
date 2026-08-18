@@ -87,6 +87,10 @@ Cloudflare (Full-Strict TLS) → Nginx → ┬→ React SPA (static bundle)
     <td align="center" width="50%"><img src="media/optimized/system-explorer.webp" alt="API Explorer" width="100%"><br><b>API Explorer</b> — fire any endpoint and inspect the raw response</td>
   </tr>
   <tr>
+    <td align="center" width="50%"><img src="media/optimized/analytics.webp" alt="Analytics" width="100%"><br><b>Analytics</b> — growth, demographics, revenue, and top spenders</td>
+    <td align="center" width="50%"><img src="media/optimized/activity.webp" alt="Activity" width="100%"><br><b>Activity</b> — day × hour heatmap of 2M events</td>
+  </tr>
+  <tr>
     <td align="center" width="50%"><img src="media/optimized/api-access.webp" alt="API Access" width="100%"><br><b>API Access</b> — endpoint catalog with curl/fetch snippets</td>
     <td align="center" width="50%"><img src="media/optimized/settings.webp" alt="Settings" width="100%"><br><b>Settings</b> — theme picker, mascots, and the animation gallery</td>
   </tr>
@@ -103,6 +107,7 @@ Plus an **interactive Swagger UI** at [`/api/docs`](https://mit.creations.ren/ap
 | `/api/search` | `GET` | `?q=&type=email\|phone\|user_id\|name&limit=&offset=` |
 | `/api/quality` | `GET` | Live data-quality snapshot (completeness, validity, issues) |
 | `/api/metrics` | `GET` | Judge-shape metrics: duplicates, missing fields, quality score |
+| `/api/analytics` | `GET` | Live data-science snapshot: growth, demographics, revenue, heatmap |
 | `/api/duplicates/:user_id` | `GET` | Scored duplicate candidates (`?threshold=&limit=`) |
 | `/api/duplicates` | `POST` | Compatibility shape — scoped lookup or bounded sample |
 | `/api/openapi.json` | `GET` | Machine-readable spec |
