@@ -41,3 +41,7 @@ Thumbs.db
 # Load test results (keep summarized in PERFORMANCE.md, not raw dumps)
 loadtest/results/*.json
 loadtest/results/*.txt
+
+# But keep the small benchmark/verification SQL under scripts/ (the *.sql
+# rule above exists only to exclude the multi-GB dataset dump)
+!scripts/*.sql
