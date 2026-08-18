@@ -197,14 +197,14 @@ async fn search_email(
     // its own merits (always cheap here) before the outer ORDER BY/LIMIT is
     // applied to its now-tiny result. See DATABASE_NOTES.md.
     let rows = sqlx::query(
-        "SELECT user_id, full_name, user_email, msisdn, status, create_time AS created_at,
+        "SELECT sub.created_at, sub.user_id, sub.full_name, sub.user_email, sub.msisdn, sub.status,
                 count(*) OVER() AS total
          FROM (
            SELECT user_id, full_name, user_email, msisdn, status, create_time AS created_at
            FROM ws_user WHERE LOWER(user_email) = $1
            OFFSET 0
          ) sub
-         ORDER BY user_id LIMIT $2 OFFSET $3",
+         ORDER BY sub.user_id LIMIT $2 OFFSET $3",
     )
     .bind(&normalized)
     .bind(limit)
@@ -239,14 +239,14 @@ async fn search_phone(
     // Single round trip via count(*) OVER() — see search_email.
     // Same optimization-fence rationale as search_email — see comment there.
     let rows = sqlx::query(
-        "SELECT user_id, full_name, user_email, msisdn, status, create_time AS created_at,
+        "SELECT sub.created_at, sub.user_id, sub.full_name, sub.user_email, sub.msisdn, sub.status,
                 count(*) OVER() AS total
          FROM (
            SELECT user_id, full_name, user_email, msisdn, status, create_time AS created_at
            FROM ws_user WHERE msisdn_norm = $1
            OFFSET 0
          ) sub
-         ORDER BY user_id LIMIT $2 OFFSET $3",
+         ORDER BY sub.user_id LIMIT $2 OFFSET $3",
     )
     .bind(&normalized)
     .bind(limit)
