@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { Info, Mail, Phone, UserRound, UserX } from 'lucide-react'
+import { Info, Mail, Phone, UserRound } from 'lucide-react'
 import { Card } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
@@ -197,7 +197,7 @@ export default function Duplicates() {
       {userId !== null && isLoading && (
         <div className="flex flex-col gap-4">
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <AppLottie src={ANIM.gears} size={22} className="!size-6" />
+            <AppLottie src={ANIM.searchingNotes} size={28} />
             Analyzing customer {userId}…
           </div>
           <Skeleton className="h-16 w-full" />
@@ -211,18 +211,21 @@ export default function Duplicates() {
 
       {userId !== null && !isLoading && notFound && (
         <Card className="flex flex-col items-center gap-2 p-10 text-center">
-          <UserX className="size-8 text-muted-foreground" strokeWidth={1.5} />
+          <AppLottie src={ANIM.deleted} size={90} />
           <p className="text-sm font-medium">No customer found with ID {userId}</p>
           <p className="text-sm text-muted-foreground">Double-check the ID and try again.</p>
         </Card>
       )}
 
       {userId !== null && !isLoading && isError && !notFound && (
-        <Alert variant="destructive">
-          <AlertTitle>{error instanceof ApiError ? error.code : 'Request failed'}</AlertTitle>
-          <AlertDescription>
-            {error instanceof ApiError ? error.message : 'An unexpected error occurred.'}
-          </AlertDescription>
+        <Alert variant="destructive" className="items-center">
+          <AppLottie src={ANIM.warning} size={36} className="mr-2" />
+          <div>
+            <AlertTitle>{error instanceof ApiError ? error.code : 'Request failed'}</AlertTitle>
+            <AlertDescription>
+              {error instanceof ApiError ? error.message : 'An unexpected error occurred.'}
+            </AlertDescription>
+          </div>
         </Alert>
       )}
 
