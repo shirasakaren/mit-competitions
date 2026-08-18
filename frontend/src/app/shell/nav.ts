@@ -4,6 +4,8 @@ import {
   ShieldCheck,
   Copy,
   Activity,
+  BarChart3,
+  CalendarClock,
   TerminalSquare,
   Settings,
   type LucideIcon,
@@ -22,6 +24,8 @@ export const NAV_ITEMS: NavItem[] = [
   { to: '/quality', label: 'Data Quality', icon: ShieldCheck },
   { to: '/duplicates', label: 'Duplicates', icon: Copy },
   { to: '/system', label: 'System', icon: Activity },
+  { to: '/analytics', label: 'Analytics', icon: BarChart3 },
+  { to: '/activity', label: 'Activity', icon: CalendarClock },
   { to: '/api-access', label: 'API Access', icon: TerminalSquare },
   { to: '/settings', label: 'Settings', icon: Settings },
 ]
