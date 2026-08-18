@@ -45,3 +45,7 @@ loadtest/results/*.txt
 # But keep the small benchmark/verification SQL under scripts/ (the *.sql
 # rule above exists only to exclude the multi-GB dataset dump)
 !scripts/*.sql
+
+# Raw (unoptimized) screen captures stay local; the README uses media/optimized/
+media/*.mov
+media/Screenshot*.png
