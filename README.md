@@ -1,4 +1,8 @@
 <div align="center">
+  <img src="media/optimized/header.webp" alt="Customer Intelligence Platform" width="100%" style="max-width:1000px">
+</div>
+
+<div align="center">
 
 # ⬛ Customer Intelligence Platform
 
