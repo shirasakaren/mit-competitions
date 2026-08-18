@@ -75,7 +75,7 @@ backend/src/
 
 | Route | Method | Purpose |
 |---|---|---|
-| `/health` | GET | Round 1 judge-compat liveness (hardcoded `total_records`, see DATABASE_NOTES.md) |
+| `/health` | GET | Round 1 liveness; `total_records` = live snapshot count with a true-count warm-up fallback (see DATABASE_NOTES.md) |
 | `/api/health` | GET | cheap liveness probe, no DB touch |
 | `/api/search` | GET | email / phone / user_id / name search |
 | `/api/quality` | GET | live-computed data-quality snapshot |
