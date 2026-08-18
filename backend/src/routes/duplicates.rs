@@ -93,9 +93,15 @@ async fn find_duplicates(
     let name_norm = target.full_name.as_deref().map(normalize::normalize_name).filter(|s| !s.is_empty());
 
     let mut tx = pool.begin().await?;
-    sqlx::query(&format!("SET LOCAL statement_timeout = '{DUPLICATE_QUERY_TIMEOUT_MS}'"))
-        .execute(&mut *tx)
-        .await?;
+    // Same trigram-threshold tuning as search_name (see that comment):
+    // 0.45 keeps substring-style name matches while shrinking the GIN
+    // candidate set ~5x for common substrings, measurably cutting the
+    // duplicate-lookup latency under load.
+    sqlx::query(&format!(
+        "SET LOCAL statement_timeout = '{DUPLICATE_QUERY_TIMEOUT_MS}'; SET LOCAL pg_trgm.similarity_threshold = 0.45"
+    ))
+    .execute(&mut *tx)
+    .await?;
 
     let rows = sqlx::query(
         r#"
