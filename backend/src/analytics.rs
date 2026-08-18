@@ -35,6 +35,15 @@ pub struct Bucket {
 }
 
 #[derive(Debug, Clone, Serialize)]
+pub struct SharedGroup {
+    /// Human-readable masked key (IP with the last octet hidden, or a
+    /// behavior fingerprint).
+    pub key: String,
+    /// Users sharing the key, capped at 50 per group.
+    pub user_ids: Vec<i64>,
+}
+
+#[derive(Debug, Clone, Serialize)]
 pub struct TopSpender {
     pub user_id: i64,
     pub full_name: Option<String>,
@@ -81,6 +90,12 @@ pub struct AnalyticsSnapshot {
     pub activity_heatmap: ActivityHeatmap,
     pub activity_types: Vec<Bucket>,
     pub activity_over_time: Vec<MonthPoint>,
+    /// Duplicate-find datasets (GET /api/duplicates/find): groups of users
+    /// sharing an IP address, an order-behavior fingerprint, or an
+    /// activity-behavior fingerprint — see the queries below.
+    pub ip_groups: Vec<SharedGroup>,
+    pub order_pattern_groups: Vec<SharedGroup>,
+    pub activity_pattern_groups: Vec<SharedGroup>,
 }
 
 fn pct(n: i64, total: i64) -> f64 {
@@ -396,6 +411,93 @@ async fn activity_types(pool: &PgPool) -> sqlx::Result<Vec<Bucket>> {
     Ok(buckets_with_percent(pairs))
 }
 
+/// Users sharing an IP address in the activity logs (HIGH confidence
+/// duplicate signal). IPs are masked (last octet hidden) in the response.
+async fn ip_groups(pool: &PgPool) -> sqlx::Result<Vec<SharedGroup>> {
+    let rows = sqlx::query(
+        "SELECT ip_address AS k,
+                (array_agg(user_id ORDER BY user_id))[1:50] AS ids
+         FROM ws_user_activity
+         WHERE ip_address IS NOT NULL AND ip_address <> ''
+         GROUP BY 1
+         HAVING count(DISTINCT user_id) > 1
+         ORDER BY count(DISTINCT user_id) DESC
+         LIMIT 500",
+    )
+    .fetch_all(pool)
+    .await?;
+    Ok(rows
+        .into_iter()
+        .filter_map(|r| {
+            let ip: String = r.try_get("k").ok()?;
+            let mut octets = ip.split('.');
+            let a = octets.next().unwrap_or("");
+            let b = octets.next().unwrap_or("");
+            let c = octets.next().unwrap_or("");
+            let key = format!("{a}.{b}.{c}.x");
+            Some(SharedGroup {
+                key,
+                user_ids: r.try_get("ids").unwrap_or_default(),
+            })
+        })
+        .collect())
+}
+
+/// Users with the same order-behavior fingerprint: same order count, same
+/// rounded total, same number of distinct statuses (MEDIUM confidence).
+async fn order_pattern_groups(pool: &PgPool) -> sqlx::Result<Vec<SharedGroup>> {
+    let rows = sqlx::query(
+        "WITH per_user AS (
+           SELECT user_id, count(*) AS c, COALESCE(sum(order_amount), 0) AS t,
+                  count(DISTINCT order_status) AS d
+           FROM ws_orders GROUP BY user_id
+         )
+         SELECT 'orders=' || c || ',total=' || round(t) || ',statuses=' || d AS k,
+                (array_agg(user_id ORDER BY user_id))[1:50] AS ids
+         FROM per_user
+         GROUP BY 1
+         HAVING count(*) > 1
+         ORDER BY count(*) DESC
+         LIMIT 500",
+    )
+    .fetch_all(pool)
+    .await?;
+    Ok(rows
+        .into_iter()
+        .map(|r| SharedGroup {
+            key: r.try_get("k").unwrap_or_default(),
+            user_ids: r.try_get("ids").unwrap_or_default(),
+        })
+        .collect())
+}
+
+/// Users with the same activity-behavior fingerprint: same event count and
+/// same number of distinct event types (LOW confidence).
+async fn activity_pattern_groups(pool: &PgPool) -> sqlx::Result<Vec<SharedGroup>> {
+    let rows = sqlx::query(
+        "WITH per_user AS (
+           SELECT user_id, count(*) AS c, count(DISTINCT activity_type) AS d
+           FROM ws_user_activity GROUP BY user_id
+         )
+         SELECT 'events=' || c || ',types=' || d AS k,
+                (array_agg(user_id ORDER BY user_id))[1:50] AS ids
+         FROM per_user
+         GROUP BY 1
+         HAVING count(*) > 1
+         ORDER BY count(*) DESC
+         LIMIT 500",
+    )
+    .fetch_all(pool)
+    .await?;
+    Ok(rows
+        .into_iter()
+        .map(|r| SharedGroup {
+            key: r.try_get("k").unwrap_or_default(),
+            user_ids: r.try_get("ids").unwrap_or_default(),
+        })
+        .collect())
+}
+
 async fn activity_over_time(pool: &PgPool) -> sqlx::Result<Vec<MonthPoint>> {
     let rows = sqlx::query(
         "SELECT to_char(date_trunc('month', activity_timestamp), 'YYYY-MM') AS m, count(*) AS c
@@ -434,6 +536,9 @@ pub async fn compute_analytics_snapshot(pool: &PgPool) -> sqlx::Result<Analytics
     let activity_heatmap = activity_heatmap(pool).await?;
     let activity_types = activity_types(pool).await?;
     let activity_over_time = activity_over_time(pool).await?;
+    let ip_groups = ip_groups(pool).await?;
+    let order_pattern_groups = order_pattern_groups(pool).await?;
+    let activity_pattern_groups = activity_pattern_groups(pool).await?;
 
     Ok(AnalyticsSnapshot {
         analyzed_at: Utc::now(),
@@ -456,6 +561,9 @@ pub async fn compute_analytics_snapshot(pool: &PgPool) -> sqlx::Result<Analytics
         activity_heatmap,
         activity_types,
         activity_over_time,
+        ip_groups,
+        order_pattern_groups,
+        activity_pattern_groups,
     })
 }
 

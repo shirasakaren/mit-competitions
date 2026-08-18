@@ -1,4 +1,5 @@
 mod analytics;
+mod cache;
 mod config;
 mod db;
 mod domain;
@@ -68,6 +69,14 @@ async fn main() {
         .route(
             "/api/duplicates/{user_id}",
             get(routes::duplicates::get_duplicates),
+        )
+        .route(
+            "/api/duplicates/find",
+            get(routes::duplicates::find_duplicates_by_method),
+        )
+        .route(
+            "/api/user-profile/{user_id}",
+            get(routes::user_profile::user_profile),
         )
         .route("/api/duplicates", post(routes::duplicates::post_duplicates))
         .route("/api/openapi.json", get(routes::docs::openapi_json))

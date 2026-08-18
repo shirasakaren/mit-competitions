@@ -5,3 +5,4 @@ pub mod health;
 pub mod metrics;
 pub mod quality;
 pub mod search;
+pub mod user_profile;

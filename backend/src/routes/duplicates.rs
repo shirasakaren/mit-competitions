@@ -370,3 +370,99 @@ pub async fn post_duplicates(
         }),
     ))
 }
+
+/// `GET /api/duplicates/find?method=ip_address|order_history|activity_pattern&limit=50`
+///
+/// Finds duplicate-candidate user PAIRS across the whole dataset using the
+/// Round 4 extension strategies: shared IP addresses (HIGH confidence),
+/// shared order-behavior patterns (MEDIUM), shared activity-behavior
+/// patterns (LOW). The expensive group-bys run in the background analytics
+/// pass (see analytics.rs) and are served from the snapshot cache, so this
+/// endpoint responds in well under a millisecond.
+#[derive(Debug, Deserialize)]
+pub struct FindQuery {
+    method: Option<String>,
+    limit: Option<String>,
+}
+
+#[derive(Debug, Serialize)]
+pub struct FindResponse {
+    method: String,
+    duplicates: Vec<FindPair>,
+    count: i64,
+    analyzed_at: chrono::DateTime<chrono::Utc>,
+}
+
+#[derive(Debug, Serialize)]
+pub struct FindPair {
+    id1: i64,
+    id2: i64,
+    similarity: f64,
+    confidence: Confidence,
+    reason: &'static str,
+}
+
+pub async fn find_duplicates_by_method(
+    State(state): State<AppState>,
+    Query(q): Query<FindQuery>,
+) -> AppResult<impl IntoResponse> {
+    let method = q.method.unwrap_or_else(|| "ip_address".to_string());
+    let limit = q
+        .limit
+        .as_deref()
+        .and_then(|v| v.parse::<i64>().ok())
+        .unwrap_or(50)
+        .clamp(1, 200);
+
+    let snapshot = state.analytics.get().ok_or(AppError::WarmingUp)?;
+
+    let (groups, similarity, confidence, reason) = match method.as_str() {
+        "ip_address" => (&snapshot.ip_groups, 0.95, Confidence::High, "shared_ip_address"),
+        "order_history" => (
+            &snapshot.order_pattern_groups,
+            0.75,
+            Confidence::Medium,
+            "shared_order_pattern",
+        ),
+        "activity_pattern" => (
+            &snapshot.activity_pattern_groups,
+            0.55,
+            Confidence::Low,
+            "shared_activity_pattern",
+        ),
+        other => {
+            return Err(AppError::InvalidQuery(format!(
+                "unsupported method '{other}'; expected ip_address, order_history, or activity_pattern"
+            )))
+        }
+    };
+
+    let mut pairs = Vec::with_capacity(limit as usize);
+    for group in groups {
+        for window in group.user_ids.windows(2) {
+            pairs.push(FindPair {
+                id1: window[0],
+                id2: window[1],
+                similarity,
+                confidence,
+                reason,
+            });
+            if pairs.len() >= limit as usize {
+                break;
+            }
+        }
+        if pairs.len() >= limit as usize {
+            break;
+        }
+    }
+
+    Ok((
+        StatusCode::OK,
+        Json(FindResponse {
+            method,
+            duplicates: pairs,
+            count: pairs.len() as i64,
+            analyzed_at: snapshot.analyzed_at,
+        }),
+    ))
+}
