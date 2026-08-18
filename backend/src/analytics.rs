@@ -313,16 +313,28 @@ async fn top_spenders(pool: &PgPool) -> sqlx::Result<Vec<TopSpender>> {
     .fetch_all(pool)
     .await?;
 
+    // Fetch the ten display names CONCURRENTLY instead of sequentially:
+    // the point lookups are independent, so they overlap into a single
+    // round-trip latency instead of ten.
     let mut spenders = Vec::new();
-    for r in rows {
+    let mut name_futures = Vec::new();
+    for r in &rows {
         let user_id: i64 = r.try_get("user_id")?;
-        // Point lookup for the display name — cheap and keeps the
-        // aggregation itself a pure orders-table scan.
-        let name: Option<String> = sqlx::query("SELECT full_name FROM ws_user WHERE user_id = $1")
-            .bind(user_id)
-            .fetch_optional(pool)
-            .await?
-            .and_then(|n| n.try_get("full_name").ok().flatten());
+        name_futures.push(async move {
+            let name: Option<String> =
+                sqlx::query("SELECT full_name FROM ws_user WHERE user_id = $1")
+                    .bind(user_id)
+                    .fetch_optional(pool)
+                    .await
+                    .ok()
+                    .flatten()
+                    .and_then(|n| n.try_get("full_name").ok().flatten());
+            name
+        });
+    }
+    let names = futures_util_join_all(name_futures).await;
+    for (r, name) in rows.iter().zip(names) {
+        let user_id: i64 = r.try_get("user_id")?;
         spenders.push(TopSpender {
             user_id,
             full_name: name,
