@@ -272,6 +272,22 @@
           }
         }
       }
+    },
+    "/api/analytics": {
+      "get": {
+        "summary": "Live data-quality metrics",
+        "description": "Served from a background-refreshed snapshot (see analyzed_at/computation_ms in the response) because two sub-metrics (exact distinct email/phone counts) require ~20-35s full-table passes even after indexing. Refreshed continuously; never hand-authored.",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "503": {
+            "description": "Snapshot still warming up (first ~30-90s after startup)"
+          }
+        }
+      },
+      "summary": "Live data-analysis snapshot",
+      "description": "Growth time series, demographics, revenue, top spenders, and an activity heatmap \u2014 all aggregated live from PostgreSQL by the background refresher and served from its snapshot cache. Returns 503 WARMING_UP until the first computation finishes after boot."
     }
   }
 }
