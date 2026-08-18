@@ -5,7 +5,7 @@ import { AppLottie } from '@/components/app/AppLottie'
 import { ANIM } from '@/lib/animations'
 
 // A different 404 scene on every visit — the "lost" crew takes turns.
-const LOST_SCENES = [ANIM.error404, ANIM.error404Alt, ANIM.astronaut, ANIM.wumpus, ANIM.crowPeople]
+const LOST_SCENES = [ANIM.error404, ANIM.error404Alt, ANIM.astronaut, ANIM.wumpus, ANIM.crowPeople, ANIM.curbYourAI]
 
 export default function NotFound() {
   const scene = useMemo(() => LOST_SCENES[Math.floor(Math.random() * LOST_SCENES.length)], [])
