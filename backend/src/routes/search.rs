@@ -330,31 +330,76 @@ async fn search_name(
         .execute(&mut *tx)
         .await?;
 
-    let query_result = sqlx::query(
+    // Phase 1 (fast path): btree prefix scan on
+    // idx_ws_user_fullname_lower_btree. Most real name queries are prefixes
+    // of the stored name, and the btree range returns those rows in a few
+    // milliseconds — the GIN trigram scan only runs when the prefix path
+    // yields fewer rows than the requested page size (typos, substrings
+    // that don't start the name).
+    let phase1 = sqlx::query(
         "SELECT user_id, full_name, user_email, msisdn, status, create_time AS created_at,
                 similarity(LOWER(full_name), $1) AS sim
-         FROM ws_user
-         WHERE LOWER(full_name) % $1
+         FROM (
+           SELECT user_id, full_name, user_email, msisdn, status, create_time
+           FROM ws_user
+           WHERE LOWER(full_name) >= $1 AND LOWER(full_name) < $1 || E'\\uffff'
+           OFFSET 0
+         ) sub
          ORDER BY sim DESC
          LIMIT $2",
     )
     .bind(&normalized)
     .bind(NAME_CANDIDATE_CAP)
     .fetch_all(&mut *tx)
-    .await;
+    .await?;
 
-    let rows = match query_result {
-        Ok(rows) => rows,
-        Err(sqlx::Error::Database(e)) if e.code().as_deref() == Some("57014") => {
-            // query_canceled (statement_timeout) — degrade gracefully.
-            // Log only the query length, never the raw query text: search
-            // queries are customer-derived data and don't belong in logs.
-            tracing::warn!(query_len = normalized.chars().count(), "name search timed out, returning empty page");
-            let _ = tx.rollback().await;
-            return Ok((vec![], 0));
+    let mut rows = phase1;
+
+    if (rows.len() as i64) < limit {
+        // Phase 2 (fuzzy fallback): trigram similarity scan for the
+        // remaining slots. Bounded by the statement_timeout set above.
+        let phase2 = sqlx::query(
+            "SELECT user_id, full_name, user_email, msisdn, status, create_time AS created_at,
+                    similarity(LOWER(full_name), $1) AS sim
+             FROM ws_user
+             WHERE LOWER(full_name) % $1
+             ORDER BY sim DESC
+             LIMIT $2",
+        )
+        .bind(&normalized)
+        .bind(NAME_CANDIDATE_CAP)
+        .fetch_all(&mut *tx)
+        .await;
+
+        match phase2 {
+            Ok(extra) => {
+                let mut seen: std::collections::HashSet<i64> = rows
+                    .iter()
+                    .filter_map(|r| r.try_get::<i64, _>("user_id").ok())
+                    .collect();
+                for r in extra {
+                    if let Ok(id) = r.try_get::<i64, _>("user_id") {
+                        if seen.insert(id) {
+                            rows.push(r);
+                        }
+                    }
+                }
+                // Re-rank the merged set by similarity so prefix and fuzzy
+                // results interleave correctly.
+                rows.sort_by(|a, b| {
+                    let sa: f64 = a.try_get("sim").unwrap_or(0.0);
+                    let sb: f64 = b.try_get("sim").unwrap_or(0.0);
+                    sb.partial_cmp(&sa).unwrap_or(std::cmp::Ordering::Equal)
+                });
+            }
+            Err(sqlx::Error::Database(e)) if e.code().as_deref() == Some("57014") => {
+                // query_canceled — keep the prefix rows, degrade gracefully.
+                // Log only the query length, never the raw query text.
+                tracing::warn!(query_len = normalized.chars().count(), "name fuzzy phase timed out, keeping prefix results only");
+            }
+            Err(e) => return Err(e.into()),
         }
-        Err(e) => return Err(e.into()),
-    };
+    }
     let _ = tx.commit().await;
 
     let total = rows.len() as i64;
