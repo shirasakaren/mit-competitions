@@ -51,7 +51,7 @@ BODY="$(curl -sf "$BASE_URL/api/search?q=21003474&type=user_id")"
 check "user_id search returns the row" "21003474" "$(echo "$BODY" | json_field results >/dev/null; python3 -c "
 import json,sys; d=json.load(sys.stdin); print(d['results'][0]['user_id'])" <<<"$BODY")"
 
-BODY="$(curl -sf "$BASE_URL/api/search?q=sembiring&type=name&limit=5")"
+BODY="$(curl -sf "$BASE_URL/api/search?q=customer&type=name&limit=5")"
 check "name fuzzy search returns rows" "True" "$(python3 -c "
 import json,sys; d=json.load(sys.stdin); print(len(d['results'])>0)" <<<"$BODY")"
 
