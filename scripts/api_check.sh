@@ -82,6 +82,18 @@ import json,sys; d=json.load(sys.stdin); print(isinstance(d.get('registrations')
 check "analytics heatmap cells" "True" "$(python3 -c "
 import json,sys; d=json.load(sys.stdin); h=d.get('activity_heatmap',{}); print(len(h.get('cells',[]))==7 and all(len(r)==24 for r in h['cells']))" <<<"$BODY")"
 
+echo "== Profile join & duplicate find =="
+BODY="$(curl -sf "$BASE_URL/api/user-profile/21003474")"
+check "profile returns user_id" "21003474" "$(echo "$BODY" | json_field user_id)"
+check "profile has order_count" "True" "$(python3 -c "
+import json,sys; d=json.load(sys.stdin); print(isinstance(d.get('order_count'),int))" <<<"$BODY")"
+check "profile has activity_logs" "True" "$(python3 -c "
+import json,sys; d=json.load(sys.stdin); print(isinstance(d.get('activity_logs'),list))" <<<"$BODY")"
+
+BODY="$(curl -sf "$BASE_URL/api/duplicates/find?method=ip_address&limit=50")"
+check "find ip_address returns pairs" "True" "$(python3 -c "
+import json,sys; d=json.load(sys.stdin); print(isinstance(d.get('duplicates'),list) and len(d['duplicates'])>0)" <<<"$BODY")"
+
 echo "== Round 4: duplicates =="
 BODY="$(curl -sf "$BASE_URL/api/duplicates/21003474?threshold=0.5&limit=10")"
 check "GET duplicates returns user_id" "21003474" "$(echo "$BODY" | json_field user_id)"

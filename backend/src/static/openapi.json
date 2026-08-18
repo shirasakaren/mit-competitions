@@ -288,6 +288,96 @@
       },
       "summary": "Live data-analysis snapshot",
       "description": "Growth time series, demographics, revenue, top spenders, and an activity heatmap \u2014 all aggregated live from PostgreSQL by the background refresher and served from its snapshot cache. Returns 503 WARMING_UP until the first computation finishes after boot."
+    },
+    "/api/user-profile/{user_id}": {
+      "get": {
+        "summary": "Find possible duplicate accounts for a given user",
+        "parameters": [
+          {
+            "name": "user_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "threshold",
+            "in": "query",
+            "schema": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "default": 0.5
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 50,
+              "default": 10
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "404": {
+            "description": "user_id not found"
+          }
+        }
+      },
+      "summary": "Profile with order/transaction/activity aggregates",
+      "description": "Fetches the customer profile plus live aggregates over orders, transactions, and activity logs (the Round 5 JOIN requirement). The four underlying queries run concurrently; repeated profiles hit a 30s TTL cache."
+    },
+    "/api/duplicates/find": {
+      "get": {
+        "summary": "Find possible duplicate accounts for a given user",
+        "parameters": [
+          {
+            "name": "user_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "threshold",
+            "in": "query",
+            "schema": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "default": 0.5
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 50,
+              "default": 10
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "404": {
+            "description": "user_id not found"
+          }
+        }
+      },
+      "summary": "Find duplicate user pairs by IP or behavior pattern",
+      "description": "Round 4 extension: ?method=ip_address (shared IPs, HIGH), order_history (shared order-behavior fingerprint, MEDIUM), or activity_pattern (shared activity-behavior fingerprint, LOW). Group-bys run in the background analytics pass and are served from the snapshot cache."
     }
   }
 }

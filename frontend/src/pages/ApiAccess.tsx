@@ -92,6 +92,23 @@ const ENDPOINTS: EndpointDef[] = [
   },
   {
     method: 'GET',
+    path: '/api/user-profile/{id}',
+    title: 'User profile (4-table join)',
+    description: 'Profile plus order count and total, transaction total, and latest activity logs.',
+    params: [{ name: 'id', placeholder: 'user id (required)' }],
+  },
+  {
+    method: 'GET',
+    path: '/api/duplicates/find',
+    title: 'Duplicate find by method',
+    description: 'Pairs by shared IP (high), order pattern (medium), or activity pattern (low).',
+    params: [
+      { name: 'method', placeholder: 'ip_address | order_history | activity_pattern' },
+      { name: 'limit', placeholder: '1-200 (default 50)', optional: true },
+    ],
+  },
+  {
+    method: 'GET',
     path: '/api/openapi.json',
     title: 'OpenAPI spec',
     description: 'The machine-readable specification of every endpoint above.',
@@ -196,6 +213,16 @@ function EndpointCard({ def }: { def: EndpointDef }) {
             limit: valueFor('limit').trim() ? Number(valueFor('limit')) : undefined,
           })
           break
+        case '/api/user-profile/{id}':
+          body = await fetch(`/api/user-profile/${valueFor('id')}`).then((r) => r.json())
+          break
+        case '/api/duplicates/find': {
+          const usp = new URLSearchParams()
+          if (valueFor('method').trim()) usp.set('method', valueFor('method').trim())
+          if (valueFor('limit').trim()) usp.set('limit', valueFor('limit').trim())
+          body = await fetch(`/api/duplicates/find?${usp.toString()}`).then((r) => r.json())
+          break
+        }
         case '/api/duplicates':
           body = await api.postDuplicatesSample()
           break

@@ -141,6 +141,8 @@ The diagram source is in [`media/architecture.puml`](media/architecture.puml) if
 | `/api/metrics` | `GET` | Judge shape metrics: duplicates, missing fields, quality score |
 | `/api/analytics` | `GET` | Growth, demographics, revenue, top spenders, activity heatmap |
 | `/api/duplicates/:user_id` | `GET` | Scored duplicate candidates with `?threshold=&limit=` |
+| `/api/duplicates/find` | `GET` | Pairs by shared IP, order pattern, or activity pattern |
+| `/api/user-profile/:user_id` | `GET` | Profile plus order, transaction, and activity aggregates (4-table join) |
 | `/api/duplicates` | `POST` | Compatibility shape, scoped lookup or bounded sample |
 | `/api/openapi.json` | `GET` | Machine readable spec |
 | `/api/docs` | `GET` | Interactive Swagger UI, fully self hosted |
