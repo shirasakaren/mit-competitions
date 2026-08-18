@@ -71,6 +71,17 @@ import json,sys; d=json.load(sys.stdin); print(isinstance(d['duplicates'],int) a
 check "metrics quality_score present" "True" "$(python3 -c "
 import json,sys; d=json.load(sys.stdin); print(isinstance(d['quality_score'],(int,float)))" <<<"$BODY")"
 
+echo "== Analytics =="
+BODY=""
+for _ in 1 2 3 4 5 6 7 8 9 10 11 12; do
+  BODY="$(curl -sf "$BASE_URL/api/analytics")" && break
+  sleep 10
+done
+check "analytics registrations array" "True" "$(python3 -c "
+import json,sys; d=json.load(sys.stdin); print(isinstance(d.get('registrations'),list) and len(d['registrations'])>0)" <<<"$BODY")"
+check "analytics heatmap cells" "True" "$(python3 -c "
+import json,sys; d=json.load(sys.stdin); h=d.get('activity_heatmap',{}); print(len(h.get('cells',[]))==7 and all(len(r)==24 for r in h['cells']))" <<<"$BODY")"
+
 echo "== Round 4: duplicates =="
 BODY="$(curl -sf "$BASE_URL/api/duplicates/21003474?threshold=0.5&limit=10")"
 check "GET duplicates returns user_id" "21003474" "$(echo "$BODY" | json_field user_id)"
