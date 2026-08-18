@@ -305,11 +305,11 @@ function LoadingState() {
 function WarmingUpState() {
   return (
     <Card className="flex flex-col items-center gap-3 p-10 text-center">
-      <AppLottie src={ANIM.gears} size={130} />
+      <AppLottie src={ANIM.processing} size={130} />
       <div>
         <p className="font-medium">Still computing the first snapshot</p>
         <p className="mx-auto mt-1 max-w-sm text-sm text-muted-foreground">
-          Data quality metrics run on a background cycle roughly every 2 minutes. This page refreshes
+          Data quality metrics run on a background cycle roughly every 30 minutes. This page refreshes
           automatically as soon as the first snapshot is ready.
         </p>
       </div>
@@ -319,13 +319,16 @@ function WarmingUpState() {
 
 function ErrorState({ error }: { error: unknown }) {
   return (
-    <Alert variant="destructive">
-      <AlertTitle>{error instanceof ApiError ? error.code : 'Failed to load'}</AlertTitle>
-      <AlertDescription>
-        {error instanceof ApiError
-          ? error.message
-          : 'An unexpected error occurred while loading data quality metrics.'}
-      </AlertDescription>
+    <Alert variant="destructive" className="items-center">
+      <AppLottie src={ANIM.warning} size={36} className="mr-2" />
+      <div>
+        <AlertTitle>{error instanceof ApiError ? error.code : 'Failed to load'}</AlertTitle>
+        <AlertDescription>
+          {error instanceof ApiError
+            ? error.message
+            : 'An unexpected error occurred while loading data quality metrics.'}
+        </AlertDescription>
+      </div>
     </Alert>
   )
 }
@@ -522,7 +525,10 @@ function DataIssuesSection({ issues }: { issues: DataIssue[] }) {
   return (
     <Card className="overflow-hidden p-0">
       <div className="flex items-center justify-between border-b px-4 py-3">
-        <h3 className="font-medium">Data issues</h3>
+        <div className="flex items-center gap-2">
+          <AppLottie src={ANIM.warning} size={20} />
+          <h3 className="font-medium">Data issues</h3>
+        </div>
         <Badge variant="secondary">{formatNumber(issues.length)}</Badge>
       </div>
       <div className="overflow-x-auto">
