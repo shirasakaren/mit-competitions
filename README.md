@@ -70,7 +70,9 @@ curl -s http://localhost/api/quality | jq   # warms up on a background timer; se
 | `/api/docs` | GET | interactive Swagger UI (fully self-hosted, no CDN) |
 
 Full request/response shapes: `/api/openapi.json` or `/api/docs` on the
-live deployment.
+live deployment. The console also has an in-app **API Access** page with a
+live endpoint explorer, curl/fetch snippets, and an **Animation Gallery**
+(every shipped `.lottie` asset, auto-discovered) linked from Settings.
 
 ## Load testing
 
