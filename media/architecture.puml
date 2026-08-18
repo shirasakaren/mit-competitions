@@ -1,0 +1,64 @@
+@startuml architecture
+!theme plain
+skinparam backgroundColor #FFFFFF
+skinparam componentStyle rectangle
+skinparam monochrome true
+skinparam defaultFontSize 13
+skinparam component {
+  BackgroundColor #FAFAFA
+  BorderColor #111111
+}
+
+title Customer Intelligence Platform — System Architecture
+
+actor "User / Judge" as User
+
+package "Cloudflare Edge" {
+  component "DNS + Proxy\nFull-Strict TLS" as CF
+}
+
+package "VPS (4 vCPU / 7.8 GB)" {
+  component "Nginx\nTLS termination · static SPA\n/api reverse proxy" as NGINX
+
+  package "Rust / Axum / SQLx (cip-backend)" {
+    component "Routes\nhealth · search · quality\nmetrics · duplicates · docs" as ROUTES
+    component "Background Analytics\nquality snapshot refresher\n(30 min cadence)" as BG
+    component "Main Pool\n20-50 conns" as POOL1
+    component "Analytics Pool\n1-2 conns" as POOL2
+    component "Swagger UI\nself-hosted assets" as SWAG
+  }
+
+  package "PostgreSQL 16 (cip-postgres)" {
+    component "ws_user 15M" as U
+    component "ws_orders 3M" as O
+    component "ws_transactions 2.4M" as T
+    component "ws_user_activity 2M" as A
+    component "Indexes\nbtree email/phone · GIN trigram\nmsisdn_norm generated col" as IDX
+  }
+}
+
+package "Frontend (React 19 + Vite)" {
+  component "Console SPA\nOverview · Search · Quality\nDuplicates · System · API Access\nGallery · Settings" as SPA
+}
+
+User --> CF : HTTPS
+CF --> NGINX : HTTPS (Origin CA)
+NGINX --> SPA : static bundle
+NGINX --> ROUTES : /api/*
+ROUTES --> POOL1
+POOL1 --> U
+POOL1 --> O
+POOL1 --> T
+POOL1 --> A
+U --> IDX
+BG --> POOL2
+POOL2 --> U
+ROUTES --> SWAG
+
+note bottom of BG
+  Full-table aggregates computed off the
+  request path; snapshot served via watch
+  channel in <1ms. Never pre-computed
+  results - always live queries.
+end note
+@enduml
