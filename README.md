@@ -9,10 +9,6 @@
 **Search, quality analytics, and duplicate detection over 22.4 million customer records. Everything computed live from PostgreSQL, nothing pre-canned.**
 
 <p>
-  <a href="https://mit.creations.ren"><img src="https://img.shields.io/badge/live-mit.creations.ren-5cb85c?style=flat-square" alt="live site"></a>
-  <a href="https://mit.creations.ren/api/docs"><img src="https://img.shields.io/badge/docs-swagger_ui-87CEEB?style=flat-square" alt="swagger"></a>
-</p>
-<p>
   <img src="https://img.shields.io/badge/backend-rust_%2F_axum-111111?style=flat-square&logo=rust" alt="rust">
   <img src="https://img.shields.io/badge/frontend-react_19_%2F_vite-111111?style=flat-square&logo=react" alt="react">
   <img src="https://img.shields.io/badge/database-postgresql_16-111111?style=flat-square&logo=postgresql" alt="postgres">
@@ -201,8 +197,6 @@ scripts/api_check.sh        # 22 end to end checks
 <div align="center">
 
 ---
-
-**Live:** [mit.creations.ren](https://mit.creations.ren) · **Docs:** [Swagger UI](https://mit.creations.ren/api/docs) · **Load test:** `k6 run -e BASE_URL=https://mit.creations.ren scripts/loadtest.js`
 
 <sub>Rust + Postgres + React. 22,400,430 records, one VPS.</sub>
 
