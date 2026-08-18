@@ -4,24 +4,33 @@ import { Card } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import { AppLottie } from '@/components/app/AppLottie'
 import { ANIM } from '@/lib/animations'
-import { useHealth, useMetrics, useQuality } from '@/lib/api/hooks'
+import { isWarmingUp, useHealth, useMetrics, useQuality } from '@/lib/api/hooks'
 import { formatNumber, formatPercent } from '@/lib/format'
 
 function StatCard({
   label,
   value,
   loading,
+  computing,
   suffix,
 }: {
   label: string
   value: string | number | null | undefined
   loading?: boolean
+  /** The backend snapshot is still computing — show a live indicator and
+   * wait instead of an empty em-dash. */
+  computing?: boolean
   suffix?: string
 }) {
   return (
     <Card className="p-4">
       <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{label}</div>
-      {loading ? (
+      {computing ? (
+        <div className="mt-1 flex items-center gap-1.5 text-xs text-muted-foreground">
+          <AppLottie src={ANIM.sandyLoading} size={20} />
+          Computing…
+        </div>
+      ) : loading ? (
         <Skeleton className="mt-2 h-8 w-24" />
       ) : (
         <div className="mt-1 text-2xl font-semibold tracking-tight">
@@ -69,17 +78,20 @@ export default function Overview() {
           label="Quality score"
           value={metrics.data ? metrics.data.quality_score.toFixed(1) : undefined}
           loading={metrics.isLoading}
+          computing={!metrics.data && isWarmingUp(metrics.error)}
           suffix="/ 100"
         />
         <StatCard
           label="Known duplicates"
           value={metrics.data ? formatNumber(metrics.data.duplicates) : undefined}
           loading={metrics.isLoading}
+          computing={!metrics.data && isWarmingUp(metrics.error)}
         />
         <StatCard
           label="Email completeness"
           value={quality.data ? formatPercent(100 - quality.data.quality_metrics.email.missing_percent) : undefined}
           loading={quality.isLoading}
+          computing={!quality.data && isWarmingUp(quality.error)}
         />
       </div>
 
