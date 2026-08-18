@@ -456,12 +456,13 @@ pub async fn find_duplicates_by_method(
         }
     }
 
+    let count = pairs.len() as i64;
     Ok((
         StatusCode::OK,
         Json(FindResponse {
             method,
             duplicates: pairs,
-            count: pairs.len() as i64,
+            count,
             analyzed_at: snapshot.analyzed_at,
         }),
     ))
