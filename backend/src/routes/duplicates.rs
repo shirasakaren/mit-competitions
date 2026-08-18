@@ -8,6 +8,7 @@ use axum::{
 use serde::{Deserialize, Serialize};
 use sqlx::Row;
 
+use crate::cache::TtlCache;
 use crate::domain::{
     mask::mask_phone,
     normalize,
@@ -15,6 +16,9 @@ use crate::domain::{
 };
 use crate::error::{AppError, AppResult};
 use crate::state::AppState;
+
+use std::sync::OnceLock;
+use std::time::Duration;
 
 const DEFAULT_THRESHOLD: f64 = 0.5;
 const DEFAULT_LIMIT: i64 = 10;
@@ -36,7 +40,7 @@ pub struct PossibleDuplicate {
     pub confidence: Confidence,
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Clone, Serialize)]
 pub struct DuplicatesResponse {
     pub user_id: i64,
     pub user_email: Option<String>,
@@ -104,6 +108,9 @@ async fn find_duplicates(
         .execute(&mut *tx)
         .await?;
     sqlx::query("SET LOCAL pg_trgm.similarity_threshold = 0.45")
+        .execute(&mut *tx)
+        .await?;
+    sqlx::query("SET LOCAL gin_fuzzy_search_limit = 2000")
         .execute(&mut *tx)
         .await?;
 
@@ -233,6 +240,13 @@ fn parse_limit(raw: Option<&str>) -> AppResult<i64> {
     }
 }
 
+/// TTL cache for repeated duplicate lookups (same rationale as the search
+/// cache — see cache.rs). Keyed on the full parameter set.
+fn duplicates_cache() -> &'static TtlCache<DuplicatesResponse> {
+    static CACHE: OnceLock<TtlCache<DuplicatesResponse>> = OnceLock::new();
+    CACHE.get_or_init(|| TtlCache::new(Duration::from_secs(30), 4096))
+}
+
 /// `GET /api/duplicates/:user_id?threshold=0.7&limit=10`
 pub async fn get_duplicates(
     State(state): State<AppState>,
@@ -242,8 +256,16 @@ pub async fn get_duplicates(
     let threshold = parse_threshold(q.threshold.as_deref())?;
     let limit = parse_limit(q.limit.as_deref())?;
 
+    let cache_key = format!("{user_id}|{threshold}|{limit}");
+    if let Some(resp) = duplicates_cache().get(&cache_key) {
+        return Ok((StatusCode::OK, Json(resp)));
+    }
+
     match find_duplicates(&state.pool, user_id, threshold, limit).await? {
-        Some(resp) => Ok((StatusCode::OK, Json(resp))),
+        Some(resp) => {
+            duplicates_cache().put(cache_key, resp.clone());
+            Ok((StatusCode::OK, Json(resp)))
+        }
         None => Err(AppError::NotFound(format!("user_id {user_id} not found"))),
     }
 }
