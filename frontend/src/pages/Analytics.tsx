@@ -167,25 +167,17 @@ export default function Analytics() {
             Live data science over 22.4M records — demographics, growth, commerce, and money.
           </p>
         </div>
-        {warming ? (
+        {warming || isLoading ? (
           <Card className="flex flex-col items-center gap-3 p-10 text-center">
             <AppLottie src={ANIM.sandyLoading} size={110} />
-            <p className="font-medium">Crunching 22.4M records…</p>
+            <p className="font-medium">
+              {warming ? 'Crunching 22.4M records…' : 'Loading the analytics snapshot…'}
+            </p>
             <p className="mx-auto max-w-sm text-sm text-muted-foreground">
-              The first analytics pass aggregates every table live. This page fills in
-              automatically when it's ready — usually within a few minutes of a server restart.
+              The analytics pass aggregates every table live in the background. This page
+              fills in automatically the moment it's ready, and keeps polling until then.
             </p>
           </Card>
-        ) : isLoading ? (
-          <div className="flex flex-col gap-4">
-            <Skeleton className="h-16 w-full" />
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-              {Array.from({ length: 4 }).map((_, i) => (
-                <Skeleton key={i} className="h-24 w-full" />
-              ))}
-            </div>
-            <Skeleton className="h-64 w-full" />
-          </div>
         ) : (
           <Alert variant="destructive" className="items-center">
             <AppLottie src={ANIM.warning} size={36} className="mr-2" />
