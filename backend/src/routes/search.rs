@@ -263,11 +263,15 @@ async fn search_name(
     // queries (the overwhelmingly common case) have similarity well above
     // 0.45, so recall for real names is unaffected. See DATABASE_NOTES.md.
     let mut tx = state.pool.begin().await?;
-    sqlx::query(&format!(
-        "SET LOCAL statement_timeout = '{NAME_SEARCH_TIMEOUT_MS}'; SET LOCAL pg_trgm.similarity_threshold = 0.45"
-    ))
-    .execute(&mut *tx)
-    .await?;
+    // Two separate statements: Postgres's extended protocol rejects
+    // multi-command strings in a prepared statement ("cannot insert
+    // multiple commands into a prepared statement").
+    sqlx::query(&format!("SET LOCAL statement_timeout = '{NAME_SEARCH_TIMEOUT_MS}'"))
+        .execute(&mut *tx)
+        .await?;
+    sqlx::query("SET LOCAL pg_trgm.similarity_threshold = 0.45")
+        .execute(&mut *tx)
+        .await?;
 
     let query_result = sqlx::query(
         "SELECT user_id, full_name, user_email, msisdn, status, create_time AS created_at,

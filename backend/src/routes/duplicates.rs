@@ -96,12 +96,14 @@ async fn find_duplicates(
     // Same trigram-threshold tuning as search_name (see that comment):
     // 0.45 keeps substring-style name matches while shrinking the GIN
     // candidate set ~5x for common substrings, measurably cutting the
-    // duplicate-lookup latency under load.
-    sqlx::query(&format!(
-        "SET LOCAL statement_timeout = '{DUPLICATE_QUERY_TIMEOUT_MS}'; SET LOCAL pg_trgm.similarity_threshold = 0.45"
-    ))
-    .execute(&mut *tx)
-    .await?;
+    // duplicate-lookup latency under load. Two separate statements —
+    // the extended protocol rejects multi-command prepared strings.
+    sqlx::query(&format!("SET LOCAL statement_timeout = '{DUPLICATE_QUERY_TIMEOUT_MS}'"))
+        .execute(&mut *tx)
+        .await?;
+    sqlx::query("SET LOCAL pg_trgm.similarity_threshold = 0.45")
+        .execute(&mut *tx)
+        .await?;
 
     let rows = sqlx::query(
         r#"
