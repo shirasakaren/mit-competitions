@@ -32,6 +32,8 @@ import {
   type ChartConfig,
 } from '@/components/ui/chart'
 import { AppLottie } from '@/components/app/AppLottie'
+import { LocationMap } from '@/components/app/LocationMap'
+import { cityOf } from '@/lib/geo'
 import { ANIM } from '@/lib/animations'
 import { useAnalytics, isWarmingUp } from '@/lib/api/hooks'
 import { ApiError } from '@/lib/api/client'
@@ -218,7 +220,7 @@ function AnalyticsBody({ data }: { data: AnalyticsResponse }) {
     : 0
   const firstMonth = registrations[0]?.month ?? '—'
   const lastMonth = registrations[registrations.length - 1]?.month ?? '—'
-  const topLocation = data.top_locations[0]?.label ?? '—'
+  const topLocation = (data.top_locations[0]?.label ? cityOf(data.top_locations[0].label) : null) ?? '—'
 
   const hourly: AnalyticsMonthPoint[] = data.activity_heatmap.hours.map((h) => {
     const count = sum(data.activity_heatmap.cells.map((row) => row[h] ?? 0))
@@ -361,9 +363,24 @@ function AnalyticsBody({ data }: { data: AnalyticsResponse }) {
         <Donut data={data.order_statuses} title="Order status" />
       </div>
 
+      <LocationMap data={data.top_locations} />
+
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-        <HBar data={data.top_locations} title="Top locations" subtitle="Customers by declared location" />
         <HBar data={data.top_occupations} title="Top occupations" subtitle="Customers by declared occupation" />
+        <Card className="p-4">
+          <h3 className="text-sm font-medium">Locations ranked</h3>
+          <p className="text-xs text-muted-foreground">Raw place labels, top 12 after filtering junk values</p>
+          <ul className="mt-3 flex flex-col gap-1.5 text-xs">
+            {data.top_locations.slice(0, 12).map((l) => (
+              <li key={l.label} className="flex items-center justify-between gap-2">
+                <span className="truncate">{l.label}</span>
+                <span className="shrink-0 tabular-nums text-muted-foreground">
+                  {formatNumber(l.count)} · {formatPercent(l.percent)}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </Card>
       </div>
 
       <Card className="p-4">
