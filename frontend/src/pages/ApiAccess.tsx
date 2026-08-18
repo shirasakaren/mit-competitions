@@ -337,7 +337,7 @@ export default function ApiAccess() {
 
       <div className="flex flex-col gap-3">
         <div className="flex items-center gap-2">
-          <AppLottie src={ANIM.download} size={24} />
+          <AppLottie src={ANIM.aiThinking} size={26} />
           <h3 className="text-sm font-semibold">Endpoints</h3>
           <Badge variant="secondary">{ENDPOINTS.length}</Badge>
         </div>
@@ -349,7 +349,7 @@ export default function ApiAccess() {
       <Separator />
 
       <div className="flex flex-col items-center gap-2 pb-6 text-center">
-        <AppLottie src={ANIM.confettiFile} size={64} />
+        <AppLottie src={ANIM.takeNote} size={64} />
         <p className="text-xs text-muted-foreground">
           Every endpoint above is live-computed against PostgreSQL — no cached fixtures, no mock data.
         </p>
