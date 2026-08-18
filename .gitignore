@@ -47,6 +47,7 @@ loadtest/results/*.txt
 # to exclude the multi-GB dataset dump)
 !scripts/*.sql
 !db/migrations/*.sql
+!db/init/*.sql
 
 # Raw (unoptimized) screen captures stay local; the README uses media/optimized/
 media/*.mov
