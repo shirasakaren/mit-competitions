@@ -1,0 +1,41 @@
+# Secrets - NEVER commit
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+id_rsa*
+
+# Dataset dump (5GB+, lives on VPS at /app/data)
+*.sql.gz
+*.sql
+challenge_db_anonymized_v2.sql.gz
+
+# Rust
+target/
+**/*.rs.bk
+Cargo.lock.bak
+
+# Node / frontend
+node_modules/
+dist/
+build/
+.vite/
+*.local
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+*.swp
+
+# Load test results (keep summarized in PERFORMANCE.md, not raw dumps)
+loadtest/results/*.json
+loadtest/results/*.txt
