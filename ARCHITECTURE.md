@@ -108,7 +108,10 @@ this challenge explicitly rules out. Built with:
 ### Pages
 
 `Overview`, `Search`, `Quality`, `Duplicates`, `System` (live Postgres/host
-stats), `Settings` (theme/appearance), `NotFound`. Every page renders raw
+stats), `ApiAccess` (endpoint catalog with a live try-it explorer, curl and
+fetch snippets, and a link to the Swagger docs), `Gallery` (renders every
+shipped animation, auto-discovered), `Settings` (theme/appearance),
+`NotFound`. Every page renders raw
 database values as **plain text only** — no `dangerouslySetInnerHTML`
 anywhere in the app, since search results can legitimately contain
 HTML-like or script-like garbage strings from the source data (see
