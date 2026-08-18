@@ -77,7 +77,9 @@ async fn fetch_target(pool: &sqlx::PgPool, user_id: i64) -> AppResult<Option<Tar
 /// Core duplicate-detection algorithm: bounded candidate generation (exact
 /// email, exact phone, birth_date+location, trigram name similarity) then
 /// composite scoring, per the challenge's weighting
-/// (email*0.4 + phone*0.4 + name*0.2). Returns `None` if `user_id` doesn't exist.
+/// (0.9 for an exact email or phone match, plus 0.1 of name
+/// similarity — see domain/similarity.rs). Returns `None` if `user_id`
+/// doesn't exist.
 async fn find_duplicates(
     pool: &sqlx::PgPool,
     user_id: i64,
