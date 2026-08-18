@@ -32,7 +32,7 @@ export function AppShell() {
         </div>
         <div className="flex items-center gap-2 border-t px-4 py-3 text-xs text-muted-foreground">
           <AppLottie src={ANIM.walkingTaco} size={22} />
-          v1.0 · 22.4M records
+          v1.1 · 22.4M records
         </div>
       </aside>
 
