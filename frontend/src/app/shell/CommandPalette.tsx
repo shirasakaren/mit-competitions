@@ -8,6 +8,8 @@ import {
   CommandItem,
   CommandList,
 } from '@/components/ui/command'
+import { AppLottie } from '@/components/app/AppLottie'
+import { ANIM } from '@/lib/animations'
 import { NAV_ITEMS } from './nav'
 
 export function CommandPalette() {
@@ -29,7 +31,12 @@ export function CommandPalette() {
     <CommandDialog open={open} onOpenChange={setOpen} title="Navigate" description="Jump to a section">
       <CommandInput placeholder="Search pages…" />
       <CommandList>
-        <CommandEmpty>No matching page.</CommandEmpty>
+        <CommandEmpty>
+          <div className="flex flex-col items-center gap-2 py-4">
+            <AppLottie src={ANIM.searchingFile} size={56} />
+            <span>No matching page.</span>
+          </div>
+        </CommandEmpty>
         <CommandGroup heading="Navigation">
           {NAV_ITEMS.map((item) => (
             <CommandItem
