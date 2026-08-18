@@ -49,7 +49,10 @@ export default function Overview() {
     <div className="mx-auto flex max-w-6xl flex-col gap-6">
       <Card className="flex flex-col items-center gap-3 overflow-hidden p-8 text-center sm:flex-row sm:text-left">
         <div className="flex-1">
-          <h2 className="text-2xl font-semibold tracking-tight">Customer Intelligence Platform</h2>
+          <div className="flex items-center gap-2">
+            <h2 className="text-2xl font-semibold tracking-tight">Customer Intelligence Platform</h2>
+            <AppLottie src={ANIM.sparkle} size={24} />
+          </div>
           <p className="mt-1 max-w-xl text-sm text-muted-foreground">
             Live search, data quality analytics, and duplicate detection over{' '}
             {health.data ? formatNumber(health.data.total_records) : '14,999,896'} customer records — all computed
