@@ -320,7 +320,16 @@ async fn search_name(
     // can balloon before similarity ranking even starts. 2000 candidate
     // TIDs is far beyond what LIMIT 300 keeps anyway, and rare queries
     // never come close to the cap.
-    sqlx::query("SET LOCAL gin_fuzzy_search_limit = 2000")
+    // The GIN candidate scan is capped to exactly what the LIMIT keeps:
+    // ranking 2000 candidates to return 300 was wasted heap fetching.
+    sqlx::query("SET LOCAL gin_fuzzy_search_limit = 300")
+        .execute(&mut *tx)
+        .await?;
+    // Name search is the one request-path query where intra-query
+    // parallelism pays: the bitmap heap scan splits across 2 workers and
+    // cold misses measurably shorten. (Every other request query keeps
+    // parallelism off — see db.rs.)
+    sqlx::query("SET LOCAL max_parallel_workers_per_gather = 2")
         .execute(&mut *tx)
         .await?;
 
