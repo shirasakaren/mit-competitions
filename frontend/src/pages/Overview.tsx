@@ -83,7 +83,10 @@ export default function Overview() {
       </div>
 
       <div>
-        <h3 className="mb-3 text-sm font-semibold text-muted-foreground">Jump to</h3>
+        <div className="mb-2 flex items-center gap-2">
+          <AppLottie src={ANIM.rocketLaunch} size={24} />
+          <h3 className="text-sm font-semibold text-muted-foreground">Jump to</h3>
+        </div>
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
           {SHORTCUTS.map((s) => (
             <Link key={s.to} to={s.to}>
