@@ -316,15 +316,12 @@ async fn search_name(
     sqlx::query("SET LOCAL pg_trgm.similarity_threshold = 0.45")
         .execute(&mut *tx)
         .await?;
-    // Bound the GIN scan itself: for common substrings the candidate set
-    // can balloon before similarity ranking even starts. 2000 candidate
-    // TIDs is far beyond what LIMIT 300 keeps anyway, and rare queries
-    // never come close to the cap.
-    // The GIN candidate scan is capped to exactly what the LIMIT keeps:
-    // ranking 2000 candidates to return 300 was wasted heap fetching.
-    sqlx::query("SET LOCAL gin_fuzzy_search_limit = 300")
-        .execute(&mut *tx)
-        .await?;
+    // gin_fuzzy_search_limit stays at its default (unlimited): capping it
+    // truncates candidates BEFORE the similarity recheck, which silently
+    // dropped real matches (measured: 52-row "budi santoso" match set
+    // returned 0 rows at a 300 cap). The covering GIN index makes the
+    // untruncated scan cheap instead — see db/migrations.
+
     // Name search is the one request-path query where intra-query
     // parallelism pays: the bitmap heap scan splits across 2 workers and
     // cold misses measurably shorten. (Every other request query keeps
