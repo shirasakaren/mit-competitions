@@ -106,23 +106,26 @@ export default function Duplicates() {
             .
           </p>
         </div>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button variant="ghost" size="icon" aria-label="How scoring works">
-              <Info className="size-4" />
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent side="left" className="max-w-64">
-            <div className="flex flex-col gap-1.5 py-0.5">
-              <p className="font-medium">Similarity score</p>
-              <p className="font-mono text-[11px] leading-relaxed opacity-90">
-                email_match × 0.4 + phone_match × 0.4 + name_similarity × 0.2
-              </p>
-              <p className="mt-1 font-medium">Confidence bands</p>
-              <p className="opacity-90">High ≥ 90% · Medium 70–89% · Low &lt; 70%</p>
-            </div>
-          </TooltipContent>
-        </Tooltip>
+        <div className="flex items-center gap-1">
+          <AppLottie src={ANIM.quiz} size={36} className="hidden shrink-0 sm:block" />
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button variant="ghost" size="icon" aria-label="How scoring works">
+                <Info className="size-4" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent side="left" className="max-w-64">
+              <div className="flex flex-col gap-1.5 py-0.5">
+                <p className="font-medium">Similarity score</p>
+                <p className="font-mono text-[11px] leading-relaxed opacity-90">
+                  email_match × 0.4 + phone_match × 0.4 + name_similarity × 0.2
+                </p>
+                <p className="mt-1 font-medium">Confidence bands</p>
+                <p className="opacity-90">High ≥ 90% · Medium 70–89% · Low &lt; 70%</p>
+              </div>
+            </TooltipContent>
+          </Tooltip>
+        </div>
       </div>
 
       <Card className="flex flex-col gap-3 p-4 sm:flex-row sm:items-end">
@@ -185,7 +188,7 @@ export default function Duplicates() {
 
       {userId === null && (
         <div className="flex flex-col items-center gap-3 py-16 text-center">
-          <AppLottie src={ANIM.fingerprint} size={140} />
+          <AppLottie src={ANIM.locations} size={140} />
           <p className="text-sm font-medium">Enter a user ID to search for possible duplicate accounts</p>
           <p className="max-w-sm text-sm text-muted-foreground">
             The target customer's email, phone, and name are compared against every other record
