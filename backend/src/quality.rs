@@ -24,6 +24,8 @@ use sqlx::{PgPool, Row};
 use std::sync::Arc;
 use tokio::sync::watch;
 
+use crate::domain::mask::mask_phone;
+
 #[derive(Debug, Clone, Serialize)]
 pub struct EmailQuality {
     pub total: i64,
@@ -366,7 +368,10 @@ pub async fn compute_snapshot(pool: &PgPool) -> sqlx::Result<QualitySnapshot> {
             field: "phone",
             issue_type: "malformed",
             count: cheap.phone_malformed,
-            examples: phone_examples,
+            // Phone examples are masked like every other msisdn value in the
+            // public API — no raw phone numbers leave the server (same rule
+            // the search/duplicates endpoints follow; see SECURITY.md).
+            examples: phone_examples.iter().map(|p| mask_phone(p)).collect(),
             severity: "high",
         });
     }
