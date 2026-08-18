@@ -1,4 +1,5 @@
 import type {
+  AnalyticsResponse,
   HealthResponse,
   ApiHealthResponse,
   SearchResponse,
@@ -69,6 +70,10 @@ export function getQuality(signal?: AbortSignal) {
 
 export function getMetrics(signal?: AbortSignal) {
   return request<MetricsResponse>('/api/metrics', { signal })
+}
+
+export function getAnalytics(signal?: AbortSignal) {
+  return request<AnalyticsResponse>('/api/analytics', { signal })
 }
 
 export function getDuplicates(

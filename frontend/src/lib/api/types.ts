@@ -140,3 +140,51 @@ export interface PostDuplicatesResponse {
   count: number
   note: string
 }
+
+export interface AnalyticsMonthPoint {
+  month: string
+  count: number
+  amount: number
+}
+
+export interface AnalyticsBucket {
+  label: string
+  count: number
+  percent: number
+}
+
+export interface AnalyticsTopSpender {
+  user_id: number
+  full_name: string | null
+  orders: number
+  total: number
+}
+
+export interface ActivityHeatmap {
+  days: string[]
+  hours: number[]
+  cells: number[][]
+}
+
+export interface AnalyticsResponse {
+  analyzed_at: string
+  computation_ms: number
+  registrations: AnalyticsMonthPoint[]
+  age_distribution: AnalyticsBucket[]
+  sex_distribution: AnalyticsBucket[]
+  lang_distribution: AnalyticsBucket[]
+  deposit_histogram: AnalyticsBucket[]
+  location_completeness: number
+  occupation_completeness: number
+  top_locations: AnalyticsBucket[]
+  top_occupations: AnalyticsBucket[]
+  orders_over_time: AnalyticsMonthPoint[]
+  revenue_over_time: AnalyticsMonthPoint[]
+  order_statuses: AnalyticsBucket[]
+  transaction_types: AnalyticsBucket[]
+  transaction_statuses: AnalyticsBucket[]
+  top_spenders: AnalyticsTopSpender[]
+  activity_heatmap: ActivityHeatmap
+  activity_types: AnalyticsBucket[]
+  activity_over_time: AnalyticsMonthPoint[]
+}
