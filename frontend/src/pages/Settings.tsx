@@ -26,6 +26,11 @@ const FUN_ANIMATIONS = [
   ANIM.greenMascot,
   ANIM.walkingTaco,
   ANIM.wumpus,
+  ANIM.catTyping,
+  ANIM.diningTable,
+  ANIM.musicNote,
+  ANIM.love,
+  ANIM.beatingHeart,
 ]
 
 export default function Settings() {
@@ -43,6 +48,7 @@ export default function Settings() {
         <div className="flex items-center gap-2">
           <h3 className="text-sm font-semibold">Appearance</h3>
           <AppLottie src={ANIM.sparkle} size={18} />
+          <AppLottie src={ANIM.flowerLoop} size={18} />
         </div>
         <p className="mt-0.5 text-sm text-muted-foreground">Choose a theme, or follow your system setting.</p>
         <div className="mt-4 grid grid-cols-3 gap-3">
