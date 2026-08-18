@@ -67,7 +67,7 @@ curl -s http://localhost/api/quality | jq   # warms up on a background timer; se
 | `/api/duplicates/:user_id` | GET | `?threshold=0.5&limit=10` — scored duplicate candidates |
 | `/api/duplicates` | POST | Round 4 judge-compat shape; accepts `{"user_id": N}` or no body |
 | `/api/openapi.json` | GET | machine-readable spec |
-| `/api/docs` | GET | human-readable API docs |
+| `/api/docs` | GET | interactive Swagger UI (fully self-hosted, no CDN) |
 
 Full request/response shapes: `/api/openapi.json` or `/api/docs` on the
 live deployment.
