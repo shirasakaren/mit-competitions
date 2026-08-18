@@ -271,7 +271,7 @@ function LoadingState() {
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-center gap-2 text-sm text-muted-foreground">
-        <AppLottie src={ANIM.gears} size={20} className="!size-5" />
+        <AppLottie src={ANIM.sandyLoading} size={24} />
         Computing data quality metrics…
       </div>
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
@@ -387,7 +387,8 @@ function CompletenessOverviewChart({ data }: { data: { key: string; label: strin
   const config: ChartConfig = Object.fromEntries(data.map((d) => [d.key, { label: d.label }]))
   return (
     <Card className="p-4">
-      <div>
+      <div className="flex items-center gap-2">
+        <AppLottie src={ANIM.checkmark} size={18} />
         <h3 className="font-medium">Completeness overview</h3>
         <p className="mt-1 text-sm text-muted-foreground">Percent of records with a usable value, per field</p>
       </div>
@@ -513,7 +514,7 @@ function DataIssuesSection({ issues }: { issues: DataIssue[] }) {
   if (issues.length === 0) {
     return (
       <Card className="flex flex-col items-center gap-3 p-10 text-center">
-        <AppLottie src={ANIM.done} size={110} />
+        <AppLottie src={ANIM.celebrations} size={110} />
         <div>
           <p className="font-medium">No major data issues detected</p>
           <p className="mt-1 text-sm text-muted-foreground">The latest scan did not flag any fields for review.</p>
