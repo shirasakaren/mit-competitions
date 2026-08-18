@@ -232,9 +232,15 @@ async fn top_grouped(
 ) -> sqlx::Result<Vec<Bucket>> {
     // table/column are compile-time literals at both call sites — never
     // request-derived — so formatting them into the SQL is safe.
+    //
+    // The extra !~* clause drops planted junk rows (the dataset contains
+    // SQL-injection-attempt strings like "UNKNOWN; DROP TABLE ws_user;--",
+    // which used to top the rankings) and any value with markup characters,
+    // so analytics rankings only ever show real location names.
     let sql = format!(
         "SELECT {column} AS v, count(*) AS c FROM {table}
          WHERE {column} IS NOT NULL AND {column} <> ''
+           AND {column} !~* '(;|<|>|''|drop table|insert into|delete from|update set|select |truncate|union select|alert\\(|script)'
          GROUP BY 1 ORDER BY 2 DESC LIMIT $1"
     );
     let rows = sqlx::query(&sql).bind(limit).fetch_all(pool).await?;
@@ -389,7 +395,9 @@ pub async fn compute_analytics_snapshot(pool: &PgPool) -> sqlx::Result<Analytics
     let registrations = registrations(pool).await?;
     let age = age_distribution(pool).await?;
     let (sex, lang, deposits, loc_complete, occ_complete) = user_dimensions(pool).await?;
-    let top_locations = top_grouped(pool, "ws_user", "location", 12).await?;
+    // 40 rows so the console can aggregate place-name variants per city
+    // (e.g. the five Jakarta districts) for the map view.
+    let top_locations = top_grouped(pool, "ws_user", "location", 40).await?;
     let top_occupations = top_grouped(pool, "ws_user", "occupation", 12).await?;
     let orders_over_time = monthly_orders(pool).await?;
     let revenue_over_time = monthly_revenue(pool).await?;
