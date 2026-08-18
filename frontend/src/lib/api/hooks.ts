@@ -42,7 +42,7 @@ export function isWarmingUp(error: unknown): boolean {
  * fills in on its own on the very first visit; any other error fails fast
  * (two retries). */
 function snapshotRetry(failureCount: number, error: unknown): boolean {
-  if (isWarmingUp(error)) return failureCount < 60
+  if (isWarmingUp(error)) return failureCount < 150
   return failureCount < 2
 }
 
