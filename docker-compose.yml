@@ -38,7 +38,7 @@ services:
       DB_POOL_MIN: ${DB_POOL_MIN:-20}
       DB_POOL_MAX: ${DB_POOL_MAX:-50}
       HTTP_PORT: 8080
-      TOTAL_RECORDS_COMPAT: "15000000"
+      TOTAL_RECORDS_COMPAT: "14999896"
       QUALITY_REFRESH_SECS: ${QUALITY_REFRESH_SECS:-1800}
     depends_on:
       postgres:
