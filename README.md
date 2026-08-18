@@ -34,7 +34,7 @@ It answers three questions about a customer database, fast:
 |---|---|
 | Who is this customer? | Exact email, exact phone, exact user ID, or fuzzy name search in under 100 ms on 15M rows |
 | How clean is the data? | Completeness, validity, and issue analytics computed live off PostgreSQL |
-| Who is the same person twice? | Scored duplicate detection using `email x 0.4 + phone x 0.4 + name x 0.2` |
+| Who is the same person twice? | Scored duplicate detection: an exact email or phone match is 0.9, name similarity tops it up |
 
 No external APIs, no mock fixtures, no pre-computed results. Every number you see came out of the database, either per request or on a background refresh cycle.
 

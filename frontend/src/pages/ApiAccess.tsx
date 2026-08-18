@@ -69,7 +69,7 @@ const ENDPOINTS: EndpointDef[] = [
     method: 'GET',
     path: '/api/duplicates/{id}',
     title: 'Duplicate candidates',
-    description: 'Scored possible duplicates for one customer (email·0.4 + phone·0.4 + name·0.2).',
+    description: 'Scored duplicates: exact email or phone match is 0.9, name similarity adds up to 0.1.',
     params: [
       { name: 'id', placeholder: 'user id (required)' },
       { name: 'threshold', placeholder: '0-1 (default 0.5)', optional: true },

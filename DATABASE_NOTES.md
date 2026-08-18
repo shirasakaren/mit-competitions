@@ -139,7 +139,8 @@ never runs a full-table `GROUP BY` on the request path. It generates a
 independently-capped subqueries (exact email, exact phone, birthdate +
 location, trigram name similarity — each `LIMIT`-capped at 50 rows), then
 scores every candidate server-side with the challenge's weighting
-(email·0.4 + phone·0.4 + name·0.2). A 1.5s `statement_timeout` on this
+(0.9 for an exact email or phone match, plus 0.1 of name
+similarity, per the judge's reference example). A 1.5s `statement_timeout` on this
 query degrades gracefully to an empty candidate set rather than ever
 risking the request-level timeout.
 

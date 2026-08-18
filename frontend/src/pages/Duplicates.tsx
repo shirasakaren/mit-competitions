@@ -101,7 +101,7 @@ export default function Duplicates() {
             Looks up a customer and scores every other record against it to surface possible
             duplicate accounts —{' '}
             <span className="font-mono text-xs text-foreground/80">
-              score = email·0.4 + phone·0.4 + name·0.2
+              exact email or phone = 0.9, plus name similarity
             </span>
             .
           </p>
@@ -118,7 +118,7 @@ export default function Duplicates() {
               <div className="flex flex-col gap-1.5 py-0.5">
                 <p className="font-medium">Similarity score</p>
                 <p className="font-mono text-[11px] leading-relaxed opacity-90">
-                  email_match × 0.4 + phone_match × 0.4 + name_similarity × 0.2
+                  0.9 × (email_match OR phone_match) + 0.1 × name_similarity
                 </p>
                 <p className="mt-1 font-medium">Confidence bands</p>
                 <p className="opacity-90">High ≥ 90% · Medium 70–89% · Low &lt; 70%</p>
