@@ -63,7 +63,7 @@ services:
     ports:
       # 3000 is the port the challenge's own test flow expects
       # ("curl http://localhost:3000/api/health" after docker-compose up).
-      - "3000:80"
+      - "3000:3000"
       - "80:80"
       - "443:443"
     volumes:
