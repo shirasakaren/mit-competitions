@@ -4,7 +4,7 @@
 
 <div align="center">
 
-# ⬛ Customer Intelligence Platform
+# Customer Intelligence Platform
 
 **Search, quality analytics, and duplicate detection over 22.4 million customer records — live-computed, nothing pre-canned.**
 
