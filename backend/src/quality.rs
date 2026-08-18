@@ -227,6 +227,12 @@ async fn limit_parallelism(_conn: &mut sqlx::PgConnection) -> sqlx::Result<()> {
 /// live duplicate *count* here without needing an example pair list).
 async fn compute_email_unique(pool: &PgPool) -> sqlx::Result<i64> {
     let mut conn = pool.acquire().await?;
+    // The planner prefers an (unparallelizable) index-scan Group here,
+    // measured at 117s. Forcing the parallel sequential scan with 2
+    // workers measures 46s — the warm-up window shrinks accordingly.
+    sqlx::query("SET enable_indexscan = off")
+        .execute(&mut *conn)
+        .await?;
 
     let row = sqlx::query(
         "SELECT count(*) AS c FROM (SELECT lower(user_email) FROM ws_user WHERE user_email IS NOT NULL GROUP BY lower(user_email)) t",
