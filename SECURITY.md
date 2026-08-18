@@ -133,6 +133,12 @@ range-checked path as the GET endpoint before reaching any query.
   challenge's own anonymized dump (no real customer PII), and everywhere
   else is stricter: `/api/quality` masks both its malformed-phone examples
   and its invalid-email examples before serializing them.
+- **Analytics snapshot (`/api/analytics`)**: exposes aggregate analytics
+  only — group labels like top locations/occupations are cohort counts,
+  not per-person records, and the top-spenders table shows anonymized
+  display names from the challenge's own anonymized dump, consistent with
+  the search/duplicates email policy above. No phone numbers, emails, or
+  raw per-row fields appear anywhere in the snapshot.
 - **Rate limiting**: not implemented at the application layer; Cloudflare's
   edge provides basic DDoS/abuse protection in front of the origin, but
   `security_level` and `browser_check` were deliberately lowered from
