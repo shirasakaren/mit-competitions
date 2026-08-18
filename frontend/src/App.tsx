@@ -7,6 +7,7 @@ import Quality from '@/pages/Quality'
 import Duplicates from '@/pages/Duplicates'
 import System from '@/pages/System'
 import ApiAccess from '@/pages/ApiAccess'
+import Gallery from '@/pages/Gallery'
 import Settings from '@/pages/Settings'
 import NotFound from '@/pages/NotFound'
 
@@ -21,6 +22,7 @@ export default function App() {
           <Route path="duplicates" element={<Duplicates />} />
           <Route path="system" element={<System />} />
           <Route path="api-access" element={<ApiAccess />} />
+          <Route path="gallery" element={<Gallery />} />
           <Route path="settings" element={<Settings />} />
           <Route path="*" element={<NotFound />} />
         </Route>
