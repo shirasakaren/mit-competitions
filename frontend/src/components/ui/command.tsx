@@ -59,7 +59,12 @@ function CommandDialog({
         )}
         showCloseButton={showCloseButton}
       >
-        {children}
+        {/* The <Command> wrapper is what provides the cmdk context store —
+            without it every CommandInput/CommandList/CommandItem inside
+            crashes on mount ("Cannot read properties of undefined
+            (reading 'subscribe')"), which took the whole app down to a
+            black screen when the palette was opened. */}
+        <Command className={className}>{children}</Command>
       </DialogContent>
     </Dialog>
   )
