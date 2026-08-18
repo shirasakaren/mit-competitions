@@ -329,7 +329,7 @@ export default function System() {
               <div className="flex flex-wrap items-center gap-2 text-xs">
                 <span className="inline-flex items-center gap-1.5">
                   {result.status === 'success' ? (
-                    <AppLottie src={ANIM.done} size={14} />
+                    <AppLottie src={ANIM.paymentSuccess} size={14} />
                   ) : (
                     <StatusDot tone="red" />
                   )}
