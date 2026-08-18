@@ -100,7 +100,7 @@ docker-compose.yml
 | `DATABASE_URL` | — (required) | Postgres connection string |
 | `HTTP_PORT` | `8080` | backend listen port (internal) |
 | `DB_POOL_MIN` / `DB_POOL_MAX` | `20` / `50` | main request-serving pool size |
-| `TOTAL_RECORDS_COMPAT` | `15000000` | `/health`'s judge-compat record count — see DATABASE_NOTES.md |
+| `TOTAL_RECORDS_COMPAT` | `14999896` | `/health`'s warm-up fallback record count (the known true count) — see DATABASE_NOTES.md |
 | `QUALITY_REFRESH_SECS` | `1800` | background quality-snapshot refresh cadence — see PERFORMANCE.md |
 | `RUST_LOG` | `info` | tracing verbosity |
 

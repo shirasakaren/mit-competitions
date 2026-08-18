@@ -12,19 +12,20 @@ into Postgres 16. Four core tables, 22,400,430 rows total:
 | `ws_transactions` | 2,400,548 | FK to `ws_orders` |
 | `ws_user_activity` | 2,000,000 | FK to `ws_user` |
 
-`ws_user`'s true row count is **14,999,896**, not 15,000,000. Two places in
-this API report a record count, and they intentionally disagree:
+`ws_user`'s true row count is **14,999,896**, not 15,000,000, and every
+endpoint that reports a record count now reports that true value:
 
-- `GET /health` reports a hardcoded `total_records: 15000000`
-  (`TOTAL_RECORDS_COMPAT` env var, `backend/src/config.rs`) — a
-  judge-compatibility constant, because the Round 1 spec hard-requires
-  exactly that value.
-- `GET /api/quality` and `GET /api/metrics` report the real, live-queried
+- `GET /health` serves the live-computed count from the background quality
+  snapshot whenever one exists; during the brief warm-up window before the
+  first snapshot lands (~2-3 min after boot) it falls back to the
+  `TOTAL_RECORDS_COMPAT` env var, which defaults to the known true count
+  (14,999,896) rather than a padded round number.
+- `GET /api/quality` and `GET /api/metrics` report the same live-queried
   count (14,999,896) — computed fresh by the background analytics job, not
   hand-typed anywhere.
 
-This is a deliberate, documented divergence, not a bug — see the doc
-comment on `Config::health_total_records_compat`.
+All three endpoints therefore agree on the true dataset size. See the doc
+comment on `Config::health_total_records_compat` and `routes/health.rs`.
 
 ## Import
 

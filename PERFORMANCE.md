@@ -27,12 +27,13 @@ challenge's "same machine, no infrastructure upgrade" constraint.
 | `ws_user_activity` | 2,000,000 | 279 MB |
 | **Total** | **22,400,430** | **6,375 MB** |
 
-`ws_user`'s true row count is 14,999,896, not 15,000,000. `/health` still
-reports `total_records: 15000000` — a deliberate, documented
-judge-compatibility constant (`TOTAL_RECORDS_COMPAT` env var, defaulted in
-`backend/src/config.rs`) because the Round 1 spec hard-requires that exact
-value. `/api/quality` and `/api/metrics` report the real, live-computed
-count (14,999,896). See DATABASE_NOTES.md for the full rationale.
+`ws_user`'s true row count is 14,999,896, not 15,000,000. Every endpoint
+that reports a record count reports the true value: `/health` serves the
+live-computed count from the background quality snapshot (falling back to
+the known true count only during the brief warm-up window before the first
+snapshot lands), and `/api/quality` / `/api/metrics` report the same
+live-queried count (14,999,896). See DATABASE_NOTES.md for the full
+rationale.
 
 ## Round 2 — single-request latency (per-endpoint, no concurrent load)
 
