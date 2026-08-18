@@ -20,6 +20,40 @@ interface GeoCollection {
   features: GeoFeature[]
 }
 
+/** Computes a mercator center/scale pair that fits the whole geography
+ * (including every small island) inside the SVG viewport, so the map is
+ * always centered regardless of the dataset's bounds. */
+function fitGeography(geo: GeoCollection, width: number, height: number) {
+  let minLon = Infinity
+  let maxLon = -Infinity
+  let minLat = Infinity
+  let maxLat = -Infinity
+  const walk = (c: unknown) => {
+    if (!Array.isArray(c) || typeof c[0] !== 'number') {
+      if (Array.isArray(c)) for (const x of c) walk(x)
+      return
+    }
+    const lon = c[0] as number
+    const lat = c[1] as number
+    if (lon < minLon) minLon = lon
+    if (lon > maxLon) maxLon = lon
+    if (lat < minLat) minLat = lat
+    if (lat > maxLat) maxLat = lat
+  }
+  for (const f of geo.features) walk((f.geometry as { coordinates: unknown }).coordinates)
+  const pad = 36
+  const w = width - pad * 2
+  const h = height - pad * 2
+  const mercY = (lat: number) => Math.log(Math.tan(Math.PI / 4 + (lat * Math.PI) / 360))
+  const dx = ((maxLon - minLon) * Math.PI) / 180
+  const dy = mercY(maxLat) - mercY(minLat)
+  const scale = Math.min(w / dx, h / dy)
+  return {
+    center: [(minLon + maxLon) / 2, (minLat + maxLat) / 2] as [number, number],
+    scale,
+  }
+}
+
 interface PinnedCity {
   name: string
   count: number
@@ -109,7 +143,7 @@ export function LocationMap({ data }: { data: AnalyticsBucket[] }) {
         <div className="mt-3 rounded-lg border bg-muted/20">
           <ComposableMap
             projection="geoMercator"
-projectionConfig={{ center: [118, -2.4], scale: 1150 }}
+projectionConfig={fitGeography(geo, 800, 460)}
             width={800}
             height={460}
             style={{ width: '100%', height: 'auto' }}
